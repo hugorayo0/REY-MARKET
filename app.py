@@ -29,7 +29,7 @@ def login():
         
         conexion, cursor = db_helper.get_db()
 
-        SQL = ""
+        SQL = "SELECT id_usuario, correo, contraseña, tipo_usuario FROM usuarios where correo = %s"
 
         cursor.execute(SQL, [correo_usuario])
 
@@ -40,16 +40,19 @@ def login():
             session["tipo_usuario"] = usuario["tipo_usuario"] # Nos sirve para saber que la persona que esta accediendo es cliente o administrador(el Rol del usuario)
             session["correo"] = usuario["correo"]   
             return redirect(url_for("productos"))
-        
+        cursor.close()    
+        conexion.close()
+    
     return render_template("login.html")
 @app.route("/registro", methods=['GET', 'POST'])
 def registro():
     if request.method == 'GET':
         return render_template("registro.html")
-    nombre  = request.form.get('Nombre', '').strip()
+
+    nombre    = request.form.get('Nombre', '').strip()
     apellido1 = request.form.get('Apellido1', '').strip()
-    apellido2 = request.form.get('Apellido2', '').strip()   # minúscula, igual que el HTML
-    email  = request.form.get('email', '').strip()
+    apellido2 = request.form.get('Apellido2', '').strip()
+    email     = request.form.get('email', '').strip()
     password  = request.form.get('password', '')
     password2 = request.form.get('password2', '')
 
@@ -61,20 +64,23 @@ def registro():
     pwd_hash = hashlib.sha256(password.encode()).hexdigest()
 
     conexion, cursor = db_helper.get_db()
-    cursor.execute("SELECT id_usuario FROM USUARIO WHERE email = %s", (email,))
+    cursor.execute("SELECT id_usuario FROM usuarios WHERE correo = %s", (email,))
     if cursor.fetchone():
         return render_template('registro.html', error='Ese email ya está en uso.')
 
+    try:
+        cursor.execute(
+            "INSERT INTO usuarios (nombre, apellido1, apellido2, correo, contraseña) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            (nombre, apellido1, apellido2, email, pwd_hash)
+        )
+        conexion.commit()
+    except Exception as e:
+        print("ERROR AL INSERTAR:", e)
+        return render_template('registro.html', error=f'Error: {e}')
 
-    cursor.execute(
-       
-        "INSERT INTO usuarios (nombre, apellido1, apellido2, email, contraseña) "
-        "VALUES (%s, %s, %s, %s, %s)",
-        (nombre, apellido1, apellido2, email, pwd_hash)
-        
-    )
-    conexion.commit()
     return redirect(url_for("login"))
+
     
 @app.route("/productos", methods=['GET', 'POST'])
 def productos():
@@ -108,7 +114,7 @@ def contacto():
 @app.route("/carrito")
 def carrito():
     carrito = session.get('carrito', [])
-    subtotal = sum(i['precio'] * i['cantidad'] for i in carrito)
+    subtotal = sum(float(i['precio']) * int(i['cantidad']) for i in carrito)
     envio = 0 if subtotal >= 30 else 3.99
     total = subtotal + envio
     return render_template("carrito.html", carrito=carrito, subtotal=subtotal, envio=envio, total=total)

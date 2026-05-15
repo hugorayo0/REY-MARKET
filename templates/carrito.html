@@ -52,8 +52,7 @@
                             <a href="{{ url_for('sumar_carrito', id=item.id) }}" class="ctrl-btn">+</a>
                         </div>
                         <div class="item-subtotal">
-                            {{ "%.2f"|format(item.precio * item.cantidad) }}€
-                        </div>
+                                {{ "%.2f"|format(item.precio|float * item.cantidad|int) }}€                        </div>
                         <a href="{{ url_for('eliminar_carrito', id=item.id) }}" class="item-eliminar" title="Eliminar">✕</a>
                     </div>
                     {% endfor %}
