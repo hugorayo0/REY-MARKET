@@ -19,7 +19,7 @@ def inicio():
 
 @app.route("/Pagina_Principal")
 def Pagina_Principal():
-    return render_template("supermercado.html")
+    return render_template("index.html")
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -39,14 +39,13 @@ def login():
             session["id_usuario"] = usuario["id_usuario"]
             session["tipo_usuario"] = usuario["tipo_usuario"] # Nos sirve para saber que la persona que esta accediendo es cliente o administrador(el Rol del usuario)
             session["correo"] = usuario["correo"]   
-            return redirect(url_for("Productos"))
+            return redirect(url_for("productos"))
         
     return render_template("login.html")
 @app.route("/registro", methods=['GET', 'POST'])
 def registro():
     if request.method == 'GET':
         return render_template("registro.html")
-
     nombre  = request.form.get('Nombre', '').strip()
     apellido1 = request.form.get('Apellido1', '').strip()
     apellido2 = request.form.get('Apellido2', '').strip()   # minúscula, igual que el HTML
@@ -68,11 +67,11 @@ def registro():
 
 
     cursor.execute(
-       cursor.execute(
+       
         "INSERT INTO usuarios (nombre, apellido1, apellido2, email, contraseña) "
         "VALUES (%s, %s, %s, %s, %s)",
         (nombre, apellido1, apellido2, email, pwd_hash)
-        )
+        
     )
     conexion.commit()
     return redirect(url_for("login"))
