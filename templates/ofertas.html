@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REY MARKET</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('productos') }}">Productos</a></li>
+                <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('registro') }}">Registro</a></li>
+                <li style="position:relative;">
+                 <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">🛒
+                <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
+                {{ total_items_carrito }}
+                </span>
+                </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="container">
+            <h1 style="text-align: center; color: #2e7d32; margin-top: 20px;">🔥 OFERTAS     🔥</h1>
+            <p style="text-align: center; margin-bottom: 30px;">Descuentos exclusivos solo por hoy</p>
+
+            <div class="Productos">
+                <div class="producto oferta-card">
+                    <span class="badge-oferta">-25%</span>
+                    <img src="https://agu-conservas.com/1980-extra_large_default/atun-claro-aceite-oliva-ortiz-pack-3-latas.jpg" alt="Atún">
+                    <span class="cat-tag">Conservas</span>
+                    <h3>Atún en Lata (pack 3)</h3>
+                    <p class="precio-original">6.00€</p>
+                    <p class="precio-producto">4.50€</p>
+                    <button>Añadir al carrito</button>
+                </div>
+
+                <div class="producto oferta-card">
+                    <span class="badge-oferta">-50%</span>
+                    <img src="https://m.media-amazon.com/images/I/51Jxg97Nh1L.jpg" alt="Pasta">
+                    <span class="cat-tag">Pasta</span>
+                    <h3>Macarrones Penne</h3>
+                    <p class="precio-original">2.49€</p>
+                    <p class="precio-producto">1.25€</p>
+                    <button>Añadir al carrito</button>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REY MARKET</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('productos') }}">Productos</a></li>
+                <li><a href="{{ url_for('ofertas') }}">Ofertas</a></li>
+                <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('registro') }}">Registro</a></li>
+                <li style="position:relative;">
+                    <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">🛒
+                        <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
+                            {{ total_items_carrito }}
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="carrito-page">
+        <h1 class="carrito-titulo">Tu carrito</h1>
+
+        {% if not carrito %}
+            <div class="carrito-vacio">
+                <p class="carrito-vacio-icon">🛒</p>
+                <p>Tu carrito está vacío</p>
+                <a href="{{ url_for('productos') }}" class="btn-primary">Ver productos</a>
+            </div>
+        {% else %}
+            <div class="carrito-layout">
+
+                <div class="carrito-items">
+                    {% for item in carrito %}
+                    <div class="carrito-item">
+                        <div class="item-info">
+                            <p class="item-nombre">{{ item.nombre }}</p>
+                            <p class="item-precio-unit">{{ item.precio }}€ / ud.</p>
+                        </div>
+                        <div class="item-controles">
+                            <a href="{{ url_for('restar_carrito', id=item.id) }}" class="ctrl-btn">−</a>
+                            <span class="item-cantidad">{{ item.cantidad }}</span>
+                            <a href="{{ url_for('sumar_carrito', id=item.id) }}" class="ctrl-btn">+</a>
+                        </div>
+                        <div class="item-subtotal">
+                            {{ "%.2f"|format(item.precio * item.cantidad) }}€
+                        </div>
+                        <a href="{{ url_for('eliminar_carrito', id=item.id) }}" class="item-eliminar" title="Eliminar">✕</a>
+                    </div>
+                    {% endfor %}
+
+                    <a href="{{ url_for('productos') }}" class="btn-secondary btn-seguir">+ Seguir comprando</a>
+                </div>
+
+                <div class="carrito-resumen">
+                    <h2>Resumen del pedido</h2>
+                    <div class="resumen-linea">
+                        <span>Artículos</span>
+                        <span>{{ total_items_carrito }}</span>
+                    </div>
+                    <div class="resumen-linea">
+                        <span>Subtotal</span>
+                        <span>{{ "%.2f"|format(subtotal) }}€</span>
+                    </div>
+                    <div class="resumen-linea">
+                        <span>Envío</span>
+                        <span class="{{ 'texto-verde' if envio == 0 }}">
+                            {% if envio == 0 %}Gratis{% else %}{{ "%.2f"|format(envio) }}€{% endif %}
+                        </span>
+                    </div>
+                    {% if envio > 0 %}
+                    <p class="resumen-envio-aviso">
+                        Te faltan {{ "%.2f"|format(30 - subtotal) }}€ para envío gratis
+                    </p>
+                    {% endif %}
+                    <div class="resumen-total">
+                        <span>Total</span>
+                        <span>{{ "%.2f"|format(total) }}€</span>
+                    </div>
+                    <a href="{{ url_for('checkout') }}" class="btn-primary btn-checkout">Finalizar compra →</a>
+                </div>
+
+            </div>
+        {% endif %}
+    </main>
+</body>
+</html>

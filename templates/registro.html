@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REY MARKET</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body class="body-login-registro">
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{url_for('Pagina_Principal')}}">Inicio</a></li>
+                <li><a href="{{url_for('productos')}}">Productos</a></li>
+                <li><a href="{{ url_for('ofertas')}}">Ofertas</a></li>
+                <li><a href="{{url_for('contacto')}}">Contacto</a></li>
+                <li><a href="{{url_for('login')}}">Login</a></li>
+                <li style="position:relative;">
+                <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">🛒
+                <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
+                {{ total_items_carrito }}
+                </span>
+                </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="box-formulario registro">
+            {% if error %}
+            <p style="background:#383838; color:#fff; padding:12px 20px; border-radius:8px; text-align:center; margin-bottom:16px;">❌ {{ error }}</p>
+            {% endif %}
+            
+            
+            <h1>Crear una cuenta</h1><br>
+            <form action="" method="post">
+    
+                <label for="Nombre">Escribe tu nombre</label><br>
+                <input type="text" name="Nombre" placeholder="Tu nombre" maxlength="50" required><br>
+                
+                <label for="Apellido1">Escribe tu primer apellido</label><br>
+                <input type="text" name="Apellido1" placeholder="Tu primer apellido" maxlength="50" required><br>
+
+                <label for="Apellido2">Escribe tu segundo apellido</label><br>
+                <input type="text" name="Apellido2" placeholder="Tu segundo apellido" maxlength="50" required><br>
+                
+                <label for="email">Escribe tu correo electrónico</label><br>
+                <input type="email" name="email" placeholder="Email" required pattern="^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$"><br>
+                
+                <label for="password">Escribe tu contraseña</label><br>
+                <input type="password" name="password" placeholder="Contraseña" required pattern=".{8,64}" title="Debe ser entre 8 y 64 caracteres"><br>
+                <input type="password" name="password2" placeholder="Repite la contraseña" required pattern=".{8,64}" title="Debe ser entre 8 y 64 caracteres"><br>
+                
+                <button type="submit">Registrarse</button><br><br>
+            </form>
+            <p>¿Tienes una cuenta? <a href="{{url_for('login')}}" style="color:var(--verde-claro)">Inicia sesión</a> </p>
+        </div>
+    </main>
+</body>

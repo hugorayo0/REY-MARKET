@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermercado</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('productos') }}">Productos</a></li>
+                <li><a href="{{ url_for('ofertas')}}">Ofertas</a></li>
+                <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('registro') }}">Registro</a></li>
+                <li style="position:relative;">
+                <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">🛒
+                <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
+                {{ total_items_carrito }}
+                </span>
+                </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <center><h1>Supermercado REY MARKET</h1></center>
+    <center><p>¡Bienvenido al supermercado REY MARKET!</p></center>
+    <center><p>Aqui encontrarás los productos de mejor calidad a un precio imbatible</p></center>
+    <p class="hero-sub"> Envio gratis en pedidos superiores a 30€ - Entrega en 24h</p>
+    <div class="hero-botones">
+         <a href="{{ url_for('productos') }}" class="btn-primary">Ver productos</a>
+        <a href="#ofertas" class="btn-secondary">Ver ofertas del día</a>
+    </div>
+
+    <section class="estadisticas">
+        <div class="stat">
+            <span class="stat-numero">+2.000</span>
+            <span class="stat-label">Productos disponibles</span>
+        </div>
+        <div class="stat">
+            <span class="stat-numero">24h</span>
+            <span class="stat-label">Entrega rápida</span>
+        </div>
+        <div class="stat">
+            <span class="stat-numero">90%</span>
+            <span class="stat-label">Clientes satisfechos</span>
+        </div>
+        <div class="stat">
+            <span class="stat-numero">Gratis</span>
+            <span class="stat-label">Envío desde 30€</span>
+        </div>
+    </section>
+
+
+      <section class="banner-envio">
+        <p>🚚 <strong>Entrega a domicilio en 24 horas</strong> — Pedidos antes de las 18:00h se entregan al día siguiente</p>
+    </section>
+
+</body>
+</html>

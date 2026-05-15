@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REY MARKET</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body class="body-login-registro">
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{url_for('Pagina_Principal')}}">Inicio</a></li>
+                <li><a href="{{url_for('productos')}}">Productos</a></li>
+                <li><a href="{{ url_for('ofertas')}}">Ofertas</a></li>
+                <li><a href="{{url_for('contacto')}}">Contacto</a></li>
+                <li><a href="{{ url_for('registro') }}">Registro</a></li>
+                <li style="position:relative;">
+                <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">🛒
+                <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
+                {{ total_items_carrito }}
+                </span>
+                </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="box-formulario login">
+            <h1>Inicia Sesión</h1>
+            <p>Accede a tu cuenta de Rey Market</p><br>
+            <form action="{{ url_for('login') }}" method="POST">
+                <label for="email">Escribe tu correo electrónico</label><br>
+                <input type="email" name="email" placeholder="Tu email" required pattern="^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$"><br><br>
+
+                <label for="password">Escribe tu contraseña</label><br>
+                <input type="password" name="password" placeholder="Contraseña" required><br><br>
+
+                <button type="submit">Iniciar Sesión</button><br><br>
+                <p>¿No tienes cuenta? <a href="{{url_for('registro')}}" style="color:var(--verde-claro)">Registrate</a></p>
+            </form>
+        </div>
+    </main>
+    
+</body>
+</html>

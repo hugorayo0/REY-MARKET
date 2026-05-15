@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REY MARKET</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body class="checkout-page">
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{url_for('Pagina_Principal')}}">Inicio</a></li>
+                <li><a href="{{url_for('productos')}}">Productos</a></li>
+                <li><a href="{{ url_for('ofertas')}}">Ofertas</a></li>
+                <li><a href="{{url_for('contacto')}}">Contacto</a></li>
+                <li><a href="{{url_for('login')}}">Login</a></li>
+                <li style="position:relative;">
+                <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">🛒
+                <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
+                {{ total_items_carrito }}
+                </span>
+                </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="checkout-container">
+            {% if error %}
+            <p style="background:#383838; color:#fff; padding:12px 20px; border-radius:8px; text-align:center; margin-bottom:16px;">❌ {{ error }}</p>
+            {% endif %}
+            
+            <form action="{{ url_for('checkout') }}" method="post">
+    
+                <label for="Nombre">Nombre</label>
+                <input type="text" name="Nombre" placeholder="Tu nombre" maxlength="50" required>
+                
+                <label for="Direccion">Dirección de envio</label>
+                <input type="text" name="Apellido1" placeholder="Tu dirección" maxlength="50" required>
+
+
+                <label for="calle">Calle</label>
+                <input type="text" name="Apellido2" placeholder="Ej: Plaza de España" maxlength="50" required>
+                
+                <label for="Numero">Numero</label>
+                <input type="number" name="Portal" placeholder="Ej: 14" maxlength="50" required>
+                
+                <label for="piso">Piso</label>
+                <input type="number" name="Piso" placeholder="Ej: 2º Izquierda" maxlength="50" required>
+
+                <label for="info">Información Opcional</label>
+                <input type="text" name="info" placeholder="Ej: Timbre roto, llamar al llegar" maxlength="100">
+                
+                <button type="submit">Proceder al pago</button><br>
+            </form>
+        </div>
+    </main>
+</body>

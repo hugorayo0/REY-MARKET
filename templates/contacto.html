@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REY MARKET</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('productos') }}">Productos</a></li>
+                <li><a href="{{ url_for('ofertas')}}">Ofertas</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('registro') }}">Registro</a></li>
+                <li style="position:relative;">
+                 <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">
+                        🛒
+                <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
+                {{ total_items_carrito }}
+                </span>
+                </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <center><h1 style="margin-top: 30px; color: #2e7d32;">Contacto</h1></center>
+    <center><p style="color: #555; margin-bottom: 30px;">Estamos aquí para ayudarte</p></center>
+
+    <div style="display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; padding: 0 5% 60px;">
+
+        <!-- Info -->
+        <div style="background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); padding: 30px; width: 300px;">
+            <h2 style="color: #2e7d32; margin-bottom: 20px;">Información</h2>
+
+            <p style="font-weight: bold; margin-bottom: 5px;">Dirección</p>
+            <p style="color: #555; margin-bottom: 20px;">Rúa Edelmiro Trillo, 16, 36600 Vilagarcía de Arousa, Pontevedra</p>
+
+            <p style="font-weight: bold; margin-bottom: 5px;">Teléfono</p>
+            <p style="color: #555; margin-bottom: 20px;">+34 910 123 456</p>
+
+            <p style="font-weight: bold; margin-bottom: 5px;">Email</p>
+            <p style="color: #555; margin-bottom: 20px;">info@reymarket.es</p>
+
+            <p style="font-weight: bold; margin-bottom: 5px;">Horario</p>
+            <p style="color: #555;">Lunes a Viernes: 9:00 — 21:00</p>
+            <p style="color: #555;">Sábado: 9:00 — 20:00</p>
+            <p style="color: #555;">Domingo: 10:00 — 15:00</p>
+        </div>
+
+        <!-- Formulario -->
+        <div style="background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); padding: 30px; width: 400px;">
+            <h2 style="color: #2e7d32; margin-bottom: 20px;">Escríbenos</h2>
+
+            <form method="POST" action="{{ url_for('contacto') }}">
+                <p style="font-weight: bold; margin-bottom: 5px;">Nombre</p>
+                <input type="text" name="nombre" placeholder="Tu nombre" required
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin-bottom:15px; font-size:14px;">
+
+                <p style="font-weight: bold; margin-bottom: 5px;">Email</p>
+                <input type="email" name="email" placeholder="Tu email" required
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin-bottom:15px; font-size:14px;">
+
+                <p style="font-weight: bold; margin-bottom: 5px;">Mensaje</p>
+                <textarea name="mensaje" placeholder="Tu mensaje" required rows="5"
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin-bottom:20px; font-size:14px; resize:vertical;"></textarea>
+
+                <button type="submit" style="width:100%;">Enviar mensaje</button>
+            </form>
+        </div>
+
+    </div>
+
+    <div style="display: flex; justify-content: center; margin: 30px 0;">
+    <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12129.854751615536!2d-8.772078433384932!3d42.596543946337576!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd2f14173b2a1475%3A0x8641dba7310fcaf9!2sR%C3%BAa%20Edelmiro%20Trillo%2C%2016%2C%2036600%20Vilagarc%C3%ADa%20de%20Arousa%2C%20Pontevedra!5e0!3m2!1ses!2ses!4v1778670897769!5m2!1ses!2ses" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        width="600"
+        height="350"
+        style="border: 0; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+</div>
+
+</body>
+</html>
