@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REY MARKET</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
-    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
   
@@ -53,7 +53,7 @@
             <button class="categoria-btn" onclick="filtrarCategoria(this, 'conservas')">Conservas</button>
         </div>
 
-        <div class="Productos">
+        <div class="productos">
             {% for producto in productos %}
             <div class="producto" data-categoria="{{ producto.categoria }}">
                 <img src="{{ url_for('static', filename='imagenes/' + producto.url_imagen) }}" alt="{{ producto.nombre }}">
