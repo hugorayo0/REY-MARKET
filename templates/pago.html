@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago realizado</title>
+</head>
+
+<body>
+
+  <main>
+
+    <h1>✅ ¡Pago realizado correctamente!</h1>
+
+    <p>
+      Gracias por tu compra. Hemos recibido tu pedido y ya estamos preparando el envío.
+    </p>
+
+    <hr>
+
+    <h2>Resumen del pedido</h2>
+
+    <p><strong>Número de pedido:</strong> #48291</p>
+    <p><strong>Estado:</strong> Pagado</p>
+    <p><strong>Método de pago:</strong> Tarjeta</p>
+    <p><strong>Entrega estimada:</strong> 2 - 4 días</p>
+
+    <hr>
+    <a href="{{ url_for('Pagina_Principal') }}" class="logo">
+    <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
+    </a>
+
+  </main>
+
+</body>
+</html> 

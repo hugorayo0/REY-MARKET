@@ -2,6 +2,7 @@ import mysql.connector
 from dotenv import load_dotenv
 from flask import session
 import os
+import hashlib
 
 def get_db():
     load_dotenv()

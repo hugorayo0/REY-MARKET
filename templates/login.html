@@ -4,43 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REY MARKET</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
     <link rel="stylesheet" href="../static/css/style.css">
 </head>
-<body class="body-login-registro">
+<body>
+
     <header>
+        <a href="{{ url_for('Pagina_Principal') }}" class="logo">
+            <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
+        </a>
+
         <nav>
             <ul>
-                <li><a href="{{url_for('Pagina_Principal')}}">Inicio</a></li>
-                <li><a href="{{url_for('productos')}}">Productos</a></li>
-                <li><a href="{{ url_for('ofertas')}}">Ofertas</a></li>
-                <li><a href="{{url_for('contacto')}}">Contacto</a></li>
-                <li><a href="{{ url_for('registro') }}">Registro</a></li>
+                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('productos') }}">Productos</a></li>
+                <li><a href="{{ url_for('ofertas') }}">Ofertas</a></li>
+                <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
                 <li style="position:relative;">
-                <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">🛒
-                <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
-                {{ total_items_carrito }}
-                </span>
-                </a>
+                    <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.4rem;position:relative;display:inline-block;color:white;text-decoration:none;padding:7px;">🛒
+                        <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">{{ total_items_carrito }}</span>
+                    </a>
                 </li>
             </ul>
         </nav>
+
+        <div class="perfil-wrapper">
+            <button class="perfil-btn" onclick="togglePerfil()" title="Mi cuenta">👤</button>
+            <div class="perfil-menu" id="perfilMenu">
+                {% if session.get('nombre') %}
+                    <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div>
+                    <a href="{{ url_for('logout') }}"> Cerrar sesión</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}"> Iniciar sesión</a>
+                    <a href="{{ url_for('registro') }}"> Registrarse</a>
+                {% endif %}
+            </div>
+        </div>
     </header>
+
     <main>
-        <div class="box-formulario login">
-            <h1>Inicia Sesión</h1>
-            <p>Accede a tu cuenta de Rey Market</p><br>
+ 
+        <div class="box-formulario">
+            <h1>Iniciar Sesión</h1>
+            <p>Accede a tu cuenta de Rey Market</p>
+            
+            {% if error %}
+            <p style="background:#ffebee;color:#c62828;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">❌ {{ error }}</p>
+            {% endif %}
+            
             <form action="{{ url_for('login') }}" method="POST">
-                <label for="email">Escribe tu correo electrónico</label><br>
-                <input type="email" name="email" placeholder="Tu email" required pattern="^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$"><br><br>
-
-                <label for="password">Escribe tu contraseña</label><br>
-                <input type="password" name="password" placeholder="Contraseña" required><br><br>
-
-                <button type="submit">Iniciar Sesión</button><br><br>
-                <p>¿No tienes cuenta? <a href="{{url_for('registro')}}" style="color:var(--verde-claro)">Registrate</a></p>
+                <label for="email">Correo electrónico</label>
+                <input type="email" name="email" placeholder="tu@email.com" required pattern="^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$">
+                
+                <label for="password">Contraseña</label>
+                <input type="password" name="password" placeholder="Tu contraseña" required>
+                
+                <button type="submit" style="width:100%;padding:12px;font-size:15px;border-radius:8px;margin-top:4px;">Iniciar Sesión</button>
             </form>
+            <p style="margin-top:18px;font-size:13px;color:#777;text-align:center;">
+                ¿No tienes cuenta? <a href="{{ url_for('registro') }}" style="color:var(--verde);font-weight:600;">Regístrate</a>
+            </p>
         </div>
     </main>
     
+    <script src="../static/js/perfil.js"></script>
 </body>
 </html>

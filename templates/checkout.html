@@ -3,66 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REY MARKET</title>
+    <title>REY MARKET - Checkout</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
     <link rel="stylesheet" href="../static/css/style.css">
 </head>
 <body class="checkout-page">
+
     <header>
+        <a href="{{ url_for('Pagina_Principal') }}" class="logo">
+            <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
+        </a>
         <nav>
             <ul>
-                <li><a href="{{url_for('Pagina_Principal')}}">Inicio</a></li>
-                <li><a href="{{url_for('productos')}}">Productos</a></li>
-                <li><a href="{{ url_for('ofertas')}}">Ofertas</a></li>
-                <li><a href="{{url_for('contacto')}}">Contacto</a></li>
-                <li><a href="{{url_for('login')}}">Login</a></li>
+                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('productos') }}">Productos</a></li>
+                <li><a href="{{ url_for('ofertas') }}">Ofertas</a></li>
+                <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
                 <li style="position:relative;">
-                <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">🛒
-                <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
-                {{ total_items_carrito }}
-                </span>
-                </a>
+                    <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">🛒
+                        <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
+                            {{ total_items_carrito }}
+                        </span>
+                    </a>
                 </li>
             </ul>
         </nav>
+        <div class="perfil-wrapper">
+            <button class="perfil-btn" onclick="togglePerfil()" title="Mi cuenta">👤</button>
+            <div class="perfil-menu" id="perfilMenu">
+                {% if session.get('nombre') %}
+                    <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div>
+                    <a href="{{ url_for('logout') }}"> Cerrar sesión</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}"> Iniciar sesión</a>
+                    <a href="{{ url_for('registro') }}"> Registrarse</a>
+                {% endif %}
+            </div>
+        </div>
     </header>
+
     <main>
         <div class="checkout-container">
+
+
             {% if error %}
-            <p style="background:#383838; color:#fff; padding:12px 20px; border-radius:8px; text-align:center; margin-bottom:16px;">❌ {{ error }}</p>
+                <p style="background:#383838; color:#fff; padding:12px 20px; border-radius:8px; text-align:center; margin-bottom:16px;">❌ {{ error }}</p>
             {% endif %}
-            
+
+            {% if editar_direccion %}
+                <h2 style="font-family:'Playfair Display',serif; color:var(--verde); margin-bottom:18px;">✏️ Editar dirección de envío</h2>
+            {% else %}
+                <h2 style="font-family:'Playfair Display',serif; color:var(--verde); margin-bottom:18px;"> Introducir nueva dirección de envío</h2>
+            {% endif %}
+
             <form action="{{ url_for('checkout') }}" method="post">
-    
-                <label for="Nombre">Nombre</label>
-                <input type="text" name="Nombre" placeholder="Tu nombre" maxlength="50" required>
-                
-                <label for="Direccion">Dirección de envio</label>
-                <input type="text" name="Apellido1" placeholder="Tu dirección" maxlength="50" required>
 
+                {% if editar_direccion %}
+                    <input type="hidden" name="id_direccion_editar" value="{{ editar_direccion.id_direccion }}">
+                {% endif %}
 
-                <label for="calle">Calle</label>
-                <input type="text" name="Apellido2" placeholder="Ej: Plaza de España" maxlength="50" required>
-                
-                <label for="Numero">Nº Portal</label>
-                <input type="number" name="Portal" placeholder="Ej: 14" maxlength="50" required>
-                
-                <label for="piso">Piso</label>
-                <input type="number" name="Piso" placeholder="Ej: 2º Izquierda" maxlength="50" required>
+                <label>Nombre</label>
+                <input type="text" name="Nombre" placeholder="Tu nombre" maxlength="50"
+                       value="{{ editar_direccion.nombre_entrega if editar_direccion and editar_direccion.nombre_entrega else '' }}"
+                       {% if not editar_direccion %}required{% endif %}>
 
-                <label for="info">Información Opcional</label>
-                <input type="text" name="info" placeholder="Ej: Timbre roto, llamar al llegar" maxlength="100">
+                <label>Calle</label>
+                <input type="text" name="calle_entrega" placeholder="Ej: Plaza de España"
+                       value="{{ editar_direccion.calle_entrega if editar_direccion else '' }}" required>
 
-                <label for="provincia">Provincia</label>
-                <input type="text" name="provincia" placeholder="Ej: Andalucia" maxlength="50" required>
+                <label>Nº Portal</label>
+                <input type="number" name="portal_entrega" placeholder="Ej: 14"
+                       value="{{ editar_direccion.portal_entrega if editar_direccion else '' }}" required>
 
-                <label for="localidad">Localidad</label>
-                <input type="text" name="localidad" placeholder="Ej: Madrid" maxlength="50" required>
+                <label>Piso</label>
+                <input type="number" name="piso_entrega" placeholder="Ej: 2"
+                       value="{{ editar_direccion.piso_entrega if editar_direccion else '' }}" required>
 
-                <label for="cp">Codigo Postal</label>
-                <input type="number" name="cp" placeholder="Ej: 28001" maxlength="50" required>
-                
-                <button type="submit">Proceder al pago</button><br>
+                <label>Puerta</label>
+                <input type="text" name="puerta_entrega" placeholder="Ej: A"
+                       value="{{ editar_direccion.puerta_entrega if editar_direccion else '' }}" required>
+
+                <label>Localidad</label>
+                <input type="text" name="localidad_entrega" placeholder="Ej: Madrid"
+                       value="{{ editar_direccion.localidad_entrega if editar_direccion else '' }}" required>
+
+                <label>Provincia</label>
+                <input type="text" name="provincia_entrega" placeholder="Ej: Andalucía"
+                       value="{{ editar_direccion.provincia_entrega if editar_direccion else '' }}" required>
+
+                <label>Código Postal</label>
+                <input type="number" name="cp_entrega" placeholder="Ej: 28001"
+                       pattern="\d{5}" minlength="5" maxlength="5"
+                       value="{{ editar_direccion.cp_entrega if editar_direccion else '' }}" required>
+
+                <label>Información Opcional</label>
+                <input type="text" name="info_opcional_entrega" placeholder="Ej: Timbre roto, llamar al llegar"
+                       value="{{ editar_direccion.info_opcional_entrega if editar_direccion and editar_direccion.info_opcional_entrega else '' }}">
+
+                {% if not editar_direccion %}
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" name="guardar_direccion" value="1">
+                    Guardar esta dirección para próximas compras
+                </label>
+                {% endif %}
+
+                <button type="submit">
+                    {% if editar_direccion %}Guardar cambios y continuar{% else %}Proceder al pago{% endif %}
+                </button>
+
+                <a href="{{ url_for('carrito') }}" class="btn-secondary"
+                   style="display:block; text-align:center; margin-top:10px;">← Volver al carrito</a>
+
             </form>
         </div>
     </main>
+
+    <script src="../static/js/checkout.js"></script>
+    <script src="../static/js/perfil.js"></script>
 </body>
+</html>
