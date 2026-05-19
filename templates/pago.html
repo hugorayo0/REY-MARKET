@@ -1,36 +1,43 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pago realizado</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago realizado</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
+    <link rel="stylesheet" href="../static/css/style.css">
 </head>
-
 <body>
-
-  <main>
-
-    <h1>✅ ¡Pago realizado correctamente!</h1>
-
-    <p>
-      Gracias por tu compra. Hemos recibido tu pedido y ya estamos preparando el envío.
-    </p>
-
-    <hr>
-
-    <h2>Resumen del pedido</h2>
-
-    <p><strong>Número de pedido:</strong> #48291</p>
-    <p><strong>Estado:</strong> Pagado</p>
-    <p><strong>Método de pago:</strong> Tarjeta</p>
-    <p><strong>Entrega estimada:</strong> 1-2 días</p>
-
-    <hr>
-    <a href="{{ url_for('Pagina_Principal') }}" class="logo">
-    <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
-    </a>
-
-  </main>
-
+    <header>
+        <a href="{{ url_for('Pagina_Principal') }}" class="logo">
+            <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
+        </a>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('productos') }}">Productos</a></li>
+                <li><a href="{{ url_for('ofertas') }}">Ofertas</a></li>
+                <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
+                <li style="position:relative;">
+                    <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.4rem;position:relative;display:inline-block;color:white;text-decoration:none;padding:7px;">
+                        <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">{{ total_items_carrito }}</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div>
+            <h1>✅ ¡Pago realizado correctamente!</h1>
+            <p>Gracias por tu compra. Hemos recibido tu pedido y ya estamos preparando el envío.</p>
+            <br>
+            <br>
+            <h2>Resumen del pedido</h2>
+            <p><strong>Número de pedido:</strong> #48291</p>
+            <p><strong>Estado:</strong> Pagado</p>
+            <p><strong>Método de pago:</strong> Tarjeta</p>
+            <p><strong>Entrega estimada:</strong> 1-2 días</p>
+        </div>
+    </main>
 </body>
-</html> 
+</html>
