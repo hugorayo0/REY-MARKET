@@ -33,7 +33,7 @@
             <div class="perfil-menu" id="perfilMenu">
                 {% if session.get('nombre') %}
                     <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div>
-                     <a href="{{ url_for('historiak') }}"> Historial de pedidos</a>
+                     <a href="{{ url_for('historial') }}"> Historial de pedidos</a>
                     <a href="{{ url_for('logout') }}"> Cerrar sesión</a>
                    
                 {% else %}
