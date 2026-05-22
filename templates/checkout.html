@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REY MARKET - Checkout</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
 </head>
 <body class="checkout-page">
 
     <header>
-        <a href="{{ url_for('Pagina_Principal') }}" class="logo">
+        <a href="{{ url_for('inicio') }}" class="logo">
             <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
         </a>
         <nav>
             <ul>
-                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
                 <li><a href="{{ url_for('productos') }}">Productos</a></li>
-                <li><a href="{{ url_for('ofertas') }}">Ofertas</a></li>
                 <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
+             
                 <li style="position:relative;">
                     <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.5rem; position:relative; display:inline-block;">🛒
                         <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
@@ -33,7 +33,9 @@
             <div class="perfil-menu" id="perfilMenu">
                 {% if session.get('nombre') %}
                     <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div>
+                     <a href="{{ url_for('historiak') }}"> Historial de pedidos</a>
                     <a href="{{ url_for('logout') }}"> Cerrar sesión</a>
+                   
                 {% else %}
                     <a href="{{ url_for('login') }}"> Iniciar sesión</a>
                     <a href="{{ url_for('registro') }}"> Registrarse</a>
@@ -107,9 +109,11 @@
                 </label>
                 {% endif %}
 
-                <button type="submit">
-                    {% if editar_direccion %}Guardar cambios y continuar{% else %}Proceder al pago{% endif %}
-                </button>
+                <button type="submit" id="btn-pago" onclick="
+    document.getElementById('btn-pago').innerText = 'Procesando...';
+">
+    {% if editar_direccion %}Guardar cambios y continuar{% else %}Proceder al pago{% endif %}
+</button>
 
                 <a href="{{ url_for('carrito') }}" class="btn-secondary"
                    style="display:block; text-align:center; margin-top:10px;">← Volver al carrito</a>
@@ -117,8 +121,7 @@
             </form>
         </div>
     </main>
-
-    <script src="../static/js/checkout.js"></script>
-    <script src="../static/js/perfil.js"></script>
+    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 </body>
 </html>

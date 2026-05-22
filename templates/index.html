@@ -5,118 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REY MARKET</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
 </head>
 <body>
-
     <header>
-        <a href="{{ url_for('Pagina_Principal') }}" class="logo">
+        <a href="{{ url_for('inicio') }}" class="logo">
             <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
         </a>
-
-        <!-- NAV -->
         <nav>
             <ul>
-                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
                 <li><a href="{{ url_for('productos') }}">Productos</a></li>
-                <li><a href="{{ url_for('ofertas') }}">Ofertas</a></li>
                 <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
-
-                <!-- CARRITO -->
                 <li style="position:relative;">
-                    <a href="{{ url_for('carrito') }}" 
-                    id="carrito-icon"
-                    style="font-size:1.4rem; position:relative; display:inline-block; color:white; text-decoration:none; padding:7px;">
-
+                    <a href="{{ url_for('carrito') }}"
+                       id="carrito-icon"
+                       style="font-size:1.4rem; position:relative; display:inline-block; color:white; text-decoration:none; padding:7px;">
                         🛒
-
-                        <span 
+                        <span
                             id="carrito-badge"
                             class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
                             {{ total_items_carrito }}
                         </span>
-
                     </a>
                 </li>
             </ul>
         </nav>
-
         <div class="perfil-wrapper">
             <button class="perfil-btn" onclick="togglePerfil()" title="Mi cuenta">👤</button>
             <div class="perfil-menu" id="perfilMenu">
                 {% if session.get('nombre') %}
                     <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div>
+                    <a href="{{ url_for('historial') }}"> Historial de pedidos</a>
                     <a href="{{ url_for('logout') }}"> Cerrar sesión</a>
                 {% else %}
-                    <a href="{{ url_for('login') }}"> Iniciar sesión</a>
-                    <a href="{{ url_for('registro') }}"> Registrarse</a>
+                    <a href="{{ url_for('login') }}">Iniciar sesión</a>
+                    <a href="{{ url_for('registro') }}">Registrarse</a>
                 {% endif %}
             </div>
         </div>
-
     </header>
 
     <main style="padding-top:0;">
-
         <div class="hero">
-
             <h1>Bienvenido a Rey Market</h1>
-
-            <p>
-                Los mejores productos a precios imbatibles
-            </p>
-
-            <p class="hero-sub">
-                🚚 Envío gratis en pedidos superiores a 30€ · Entrega en 24h
-            </p>
-
+            <p>Los mejores productos a precios imbatibles</p>
+            <p class="hero-sub">🚚 Envío gratis en pedidos superiores a 30€ · Entrega en 24h</p>
             <div class="hero-botones">
-
-                <a href="{{ url_for('productos') }}" class="btn-primary">
-                    Ver productos
-                </a>
-
-                <a href="{{ url_for('ofertas') }}" class="btn-secondary">
-                    Ofertas del día
-                </a>
-
+                <a href="{{ url_for('productos') }}" class="btn-primary">Ver productos</a>
             </div>
         </div>
 
-
-
         <div class="estadisticas">
-
             <div class="stat">
                 <span class="stat-numero">+2.000</span>
                 <span class="stat-label">Productos disponibles</span>
             </div>
-
             <div class="stat">
                 <span class="stat-numero">24h</span>
                 <span class="stat-label">Entrega rápida</span>
             </div>
-
             <div class="stat">
                 <span class="stat-numero">90%</span>
                 <span class="stat-label">Clientes satisfechos</span>
             </div>
-
             <div class="stat">
                 <span class="stat-numero">Gratis</span>
                 <span class="stat-label">Envío desde 30€</span>
             </div>
-
         </div>
 
         <div class="banner-envio">
             🚚 <strong>Entrega a domicilio en 24 horas</strong> —
             Pedidos antes de las 18:00h se entregan al día siguiente
         </div>
-
     </main>
 
-    <script src="../static/js/perfil.js"></script>
-
+    <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 </body>
 </html>

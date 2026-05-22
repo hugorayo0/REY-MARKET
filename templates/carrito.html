@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REY MARKET - Carrito</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
 </head>
 <body>
 
     <header>
-        <a href="{{ url_for('Pagina_Principal') }}" class="logo">
+        <a href="{{ url_for('inicio') }}" class="logo">
             <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
         </a>
         <nav>
             <ul>
-                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
                 <li><a href="{{ url_for('productos') }}">Productos</a></li>
-                <li><a href="{{ url_for('ofertas') }}">Ofertas</a></li>
                 <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
+            
                 <li style="position:relative;">
                     <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.4rem;position:relative;display:inline-block;color:white;text-decoration:none;padding:7px;">🛒
                         <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">{{ total_items_carrito }}</span>
@@ -30,8 +30,9 @@
             <button class="perfil-btn" onclick="togglePerfil()" title="Mi cuenta">👤</button>
             <div class="perfil-menu" id="perfilMenu">
                 {% if session.get('nombre') %}
-                    <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div>
+                    <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div><a href="{{ url_for('historial') }}"> Historial de pedidos</a>
                     <a href="{{ url_for('logout') }}"> Cerrar sesión</a>
+                    
                 {% else %}
                     <a href="{{ url_for('login') }}"> Iniciar sesión</a>
                     <a href="{{ url_for('registro') }}"> Registrarse</a>
@@ -103,47 +104,65 @@
                 {% if direcciones %}
                 <div class="direcciones-guardadas">
                     <h3>Dirección de entrega</h3>
-                   {% for d in direcciones %}
-<div class="btn-direccion"
-    data-id="{{ d.id_direccion }}"
-    data-calle="{{ d.calle_entrega }}"
-    data-portal="{{ d.portal_entrega }}"
-    data-piso="{{ d.piso_entrega }}"
-    data-puerta="{{ d.puerta_entrega }}"
-    data-localidad="{{ d.localidad_entrega }}"
-    data-provincia="{{ d.provincia_entrega }}"
-    data-cp="{{ d.cp_entrega }}"
-    onclick="seleccionarDireccion(this)">
+                    {% for d in direcciones %}
+                    <div class="btn-direccion"
+                        data-nombre="{{ d.nombre_entrega }}"
+                        data-id="{{ d.id_direccion }}"
+                        data-calle="{{ d.calle_entrega }}"
+                        data-portal="{{ d.portal_entrega }}"
+                        data-piso="{{ d.piso_entrega }}"
+                        data-puerta="{{ d.puerta_entrega }}"
+                        data-localidad="{{ d.localidad_entrega }}"
+                        data-provincia="{{ d.provincia_entrega }}"
+                        data-cp="{{ d.cp_entrega }}"
+                        onclick="seleccionarDireccion(this)">
 
-    <div class="dir-radio"></div>
+                        <div class="dir-radio"></div>
 
-    <div class="dir-texto">
-        📍 {{ d.calle_entrega }}, portal {{ d.portal_entrega }}, piso {{ d.piso_entrega }} {{ d.puerta_entrega }} — {{ d.localidad_entrega }}, {{ d.provincia_entrega }} {{ d.cp_entrega }}
-    </div>
+                        <div class="dir-texto">
+                            👤 {{ d.nombre_entrega }}<br/>
+                            📍{{ d.calle_entrega }},
+                            portal {{ d.portal_entrega }}, 
+                            piso {{ d.piso_entrega }} {{ d.puerta_entrega }},
+                            {{ d.cp_entrega }}
+                            {{ d.localidad_entrega }},
+                            {{ d.provincia_entrega }}
+                        </div>
 
-    <div class="dir-acciones">
-        <button type="button" class="dir-btn-accion editar"
-            onclick="abrirEditar(event, this.closest('.btn-direccion'))">
-            ✏️ Editar
-        </button>
+                        <div class="dir-acciones">
+                            <button type="button" class="dir-btn-accion editar"
+                                onclick="abrirEditar(event, this.closest('.btn-direccion'))">
+                                ✏️ Editar
+                            </button>
+                            <button type="button" class="dir-btn-accion eliminar"
+                                onclick="abrirEliminar(event, {{ d.id_direccion }})">
+                                🗑 Eliminar
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
 
-        <button type="button" class="dir-btn-accion eliminar"
-            onclick="abrirEliminar(event, {{ d.id_direccion }})">
-            🗑 Eliminar
-        </button>
-    </div>
-
-</div>
-{% endfor %}
                     <p class="resumen-dir-aviso">¿Otra dirección? Añádela en el siguiente paso.</p>
                     <a href="{{ url_for('checkout') }}" class="btn-secondary btn-nueva-dir">+ Añadir nueva dirección</a>
                 </div>
                 {% endif %}
 
-                <form action="{{ url_for('checkout') }}" method="post" id="form-carrito">
+                {% if not direcciones %}
+                <a href="{{ url_for('checkout') }}" class="btn-secondary" style="display:block; text-align:center; margin-bottom:10px;">
+                    + Añadir dirección de entrega
+                </a>
+                {% endif %}
+
+                <form action="{{ url_for('checkout') }}" method="post" id="form-carrito" onsubmit="
+                    if (!document.getElementById('id_direccion_seleccionada').value) {
+                        alert('Por favor selecciona una dirección de entrega');
+                        return false;
+                    }
+                ">
                     <input type="hidden" name="id_direccion" id="id_direccion_seleccionada">
                     <button type="submit" class="btn-primary btn-checkout">Finalizar compra →</button>
                 </form>
+
             </div>
 
         </div>
@@ -151,15 +170,7 @@
 </main>
 
 <!-- ===== Modal EDITAR dirección ===== -->
-<div id="modalEditar" style="
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.5);
-    z-index:9999;
-    align-items:center;
-    justify-content:center;
-">
+<div id="modalEditar">
     <div style="
         background:#fff;
         border-radius:12px;
@@ -171,7 +182,10 @@
         <h3 style="margin:0 0 1.2rem;font-size:1.2rem;color:#1a1a1a;">✏️ Editar dirección</h3>
         <form action="{{ url_for('checkout') }}" method="post">
             <input type="hidden" name="id_direccion_editar" id="edit-id">
-
+            <div style="margin-bottom:0.8rem;">
+    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Nombre</label>
+    <input type="text" name="nombre_entrega" id="edit-nombre" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.8rem;">
                 <div>
                     <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Calle</label>
@@ -239,68 +253,8 @@
     </div>
 </div>
 
-<script src="../static/js/carrito.js"></script>
-<script src="../static/js/perfil.js"></script>
-<script>
-    // ── Seleccionar dirección ──────────────────────────────
-    function seleccionarDireccion(btn) {
-        document.querySelectorAll('.btn-direccion').forEach(b => b.classList.remove('seleccionada'));
-        btn.classList.add('seleccionada');
-        document.getElementById('id_direccion_seleccionada').value = btn.dataset.id;
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        const dirs = document.querySelectorAll('.btn-direccion');
-        if (dirs.length === 1) seleccionarDireccion(dirs[0]);
-    });
-
-    // ── Modal Editar ───────────────────────────────────────
-    function abrirEditar(event, btn) {
-        event.stopPropagation();
-        document.getElementById('edit-id').value        = btn.dataset.id;
-        document.getElementById('edit-calle').value     = btn.dataset.calle;
-        document.getElementById('edit-portal').value    = btn.dataset.portal;
-        document.getElementById('edit-piso').value      = btn.dataset.piso;
-        document.getElementById('edit-puerta').value    = btn.dataset.puerta;
-        document.getElementById('edit-localidad').value = btn.dataset.localidad;
-        document.getElementById('edit-provincia').value = btn.dataset.provincia;
-        document.getElementById('edit-cp').value        = btn.dataset.cp;
-
-        const modal = document.getElementById('modalEditar');
-        modal.style.cssText = 'display:flex !important; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;';
-    }
-
-    function cerrarEditar() {
-        document.getElementById('modalEditar').style.display = 'none';
-    }
-
-    document.getElementById('modalEditar').addEventListener('click', function(e) {
-        if (e.target === this) cerrarEditar();
-    });
-
-    // ── Modal Eliminar ─────────────────────────────────────
-    let idAEliminar = null;
-
-    function abrirEliminar(event, id) {
-        event.stopPropagation();
-        idAEliminar = id;
-        document.getElementById('confirmEliminar').classList.add('activo');
-    }
-
-    function cerrarConfirm() {
-        document.getElementById('confirmEliminar').classList.remove('activo');
-        idAEliminar = null;
-    }
-
-    function confirmarEliminar() {
-        if (!idAEliminar) return;
-        window.location.href = '/direccion/eliminar/' + idAEliminar;
-    }
-
-    document.getElementById('confirmEliminar').addEventListener('click', function(e) {
-        if (e.target === this) cerrarConfirm();
-    });
-</script>
+<script src="{{ url_for('static', filename='js/carrito.js') }}"></script>
+<script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 
 </body>
 </html>

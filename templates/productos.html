@@ -5,19 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REY MARKET</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
 </head>
 <body>
-  
+
     <header>
-        <a href="{{ url_for('Pagina_Principal') }}" class="logo">
+        <a href="{{ url_for('inicio') }}" class="logo">
             <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
         </a>
         <nav>
             <ul>
-                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
                 <li><a href="{{ url_for('productos') }}">Productos</a></li>
-                <li><a href="{{ url_for('ofertas') }}">Ofertas</a></li>
                 <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
                 <li style="position:relative;">
                     <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.4rem;position:relative;display:inline-block;color:white;text-decoration:none;padding:7px;">🛒
@@ -31,6 +30,7 @@
             <div class="perfil-menu" id="perfilMenu">
                 {% if session.get('nombre') %}
                     <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div>
+                    <a href="{{ url_for('historial') }}">Historial de productos</a>
                     <a href="{{ url_for('logout') }}">Cerrar sesión</a>
                 {% else %}
                     <a href="{{ url_for('login') }}">Iniciar sesión</a>
@@ -41,52 +41,134 @@
     </header>
 
     <main>
-        <div class="categorias">
-            <button class="categoria-btn activo" onclick="filtrarCategoria(this, 'todos')">Todos</button>
-            <button class="categoria-btn" onclick="filtrarCategoria(this, 'verduras')">Verduras</button>
-            <button class="categoria-btn" onclick="filtrarCategoria(this, 'refrescos')">Refrescos</button>
-            <button class="categoria-btn" onclick="filtrarCategoria(this, 'lacteos')">Lácteos</button>
-            <button class="categoria-btn" onclick="filtrarCategoria(this, 'panaderia')">Panadería</button>
-            <button class="categoria-btn" onclick="filtrarCategoria(this, 'pasta')">Pasta</button>
-            <button class="categoria-btn" onclick="filtrarCategoria(this, 'fruta')">Fruta</button>
-            <button class="categoria-btn" onclick="filtrarCategoria(this, 'carne')">Carne</button>
-            <button class="categoria-btn" onclick="filtrarCategoria(this, 'conservas')">Conservas</button>
-        </div>
+        <div class="pagina-productos">
 
-        <div class="productos">
-            {% for producto in productos %}
-            <div class="producto" data-categoria="{{ producto.categoria }}">
-                <img src="{{ url_for('static', filename='imagenes/' + producto.url_imagen) }}" alt="{{ producto.nombre }}">
-                <h3>{{ producto.nombre }}</h3>
-                <p>{{ producto.precio_unidad }}€/{{ producto.unidad_medida }}</p>
-                
-                <button onclick="AgregaralCarrito(this, '{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}')">Añadir al carrito</button>
+            <div class="contenido-productos">
 
-                {% if session.get('es_admin') %}
-                <div class="admin-acciones">
-                    
-                    <button onclick="abrirModal('{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', '{{ producto.url_imagen }}', '{{ producto.unidad_medida }}')">Editar</button>
-                    
-                    <form action="{{ url_for('eliminar_producto', id=producto.id_producto) }}" method="POST" onsubmit="return confirm('¿Eliminar {{ producto.nombre }}?')">
-                        <button type="submit" class="btn-eliminar">Eliminar</button>
-                    </form>
+                <div class="categorias">
+                    <button class="categoria-btn activo" onclick="filtrarCategoria(this, 'todos')">Todos</button>
+                    <button class="categoria-btn" onclick="filtrarCategoria(this, 'verduras')">Verduras</button>
+                    <button class="categoria-btn" onclick="filtrarCategoria(this, 'refrescos')">Refrescos</button>
+                    <button class="categoria-btn" onclick="filtrarCategoria(this, 'lacteos')">Lácteos</button>
+                    <button class="categoria-btn" onclick="filtrarCategoria(this, 'panaderia')">Panadería</button>
+                    <button class="categoria-btn" onclick="filtrarCategoria(this, 'pasta')">Pasta</button>
+                    <button class="categoria-btn" onclick="filtrarCategoria(this, 'fruta')">Fruta</button>
+                    <button class="categoria-btn" onclick="filtrarCategoria(this, 'carne')">Carne</button>
+                    <button class="categoria-btn" onclick="filtrarCategoria(this, 'conservas')">Conservas</button>
                 </div>
-                {% endif %}
+
+                <div class="productos">
+                    {% for producto in productos %}
+                        {% if producto.descuento %}
+                            <div class="producto oferta-card" data-categoria="{{ producto.categoria }}">
+                                <span class="badge-oferta">-{{ producto.descuento }}%</span>
+                                <img src="{{ url_for('static', filename='imagenes/' + producto.url_imagen) }}" alt="{{ producto.nombre }}">
+                                <h3>{{ producto.nombre }}</h3>
+                                <p class="precio-original">{{ producto.precio_unidad }}€/{{ producto.unidad_medida }}</p>
+                                <p class="precio-producto">{{ "%.2f"|format(producto.precio_unidad|float * (1 - producto.descuento|float / 100)) }}€/{{ producto.unidad_medida }}</p>
+                                {% if producto.fecha_fin %}
+                                    <p class="oferta-fecha">Oferta válida hasta el {{ producto.fecha_fin }}</p>
+                                {% endif %}
+                                <button onclick="AgregaralCarrito(this, '{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ "%.2f"|format(producto.precio_unidad|float * (1 - producto.descuento|float / 100)) }}', '{{ producto.descuento }}')">Añadir al carrito</button>
+                                {% if session.get('es_admin') %}
+                                <div class="admin-acciones">
+                                    <button onclick="abrirModal('{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', '{{ producto.url_imagen }}', '{{ producto.unidad_medida }}', '{{ producto.id_categoria }}')">Editar</button>
+                                    <form action="{{ url_for('eliminar_producto', id=producto.id_producto) }}" method="POST" onsubmit="return confirm('¿Eliminar {{ producto.nombre }}?')">
+                                        <button type="submit" class="btn-eliminar">Eliminar</button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="producto" data-categoria="{{ producto.categoria }}">
+                                <img src="{{ url_for('static', filename='imagenes/' + producto.url_imagen) }}" alt="{{ producto.nombre }}">
+                                <h3>{{ producto.nombre }}</h3>
+                                <p>{{ producto.precio_unidad }}€/{{ producto.unidad_medida }}</p>
+                                <button onclick="AgregaralCarrito(this, '{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', 0)">Añadir al carrito</button>
+                                {% if session.get('es_admin') %}
+                                <div class="admin-acciones">
+                                    <button onclick="abrirModal('{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', '{{ producto.url_imagen }}', '{{ producto.unidad_medida }}', '{{ producto.id_categoria }}')">Editar</button>
+                                    <form action="{{ url_for('eliminar_producto', id=producto.id_producto) }}" method="POST" onsubmit="return confirm('¿Eliminar {{ producto.nombre }}?')">
+                                        <button type="submit" class="btn-eliminar">Eliminar</button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
             </div>
-            {% endfor %}
+
+            {% if session.get('es_admin') %}
+            <div class="panel-admin">
+                <h2>Añadir producto</h2>
+                <form action="{{ url_for('anadir_producto') }}" method="POST">
+
+                    <label>Nombre</label>
+                    <input type="text" name="nombre" placeholder="Ej: Tomates cherry" required>
+
+                    <label>Precio (€)</label>
+                    <input type="number" name="precio_unidad" step="0.01" min="0" placeholder="1.99" required>
+
+                    <label>Unidad de medida</label>
+                    <select name="unidad_medida" required>
+                        <option value="" disabled selected>Seleccionar...</option>
+                        <option value="kg">kg</option>
+                        <option value="unidad">unidad</option>
+                        <option value="litro">litro</option>
+                        <option value="docena">docena</option>
+                        <option value="pack">pack</option>
+                    </select>
+
+                    <label>Categoría</label>
+                    <select name="id_categoria" required>
+                        <option value="" disabled selected>Seleccionar...</option>
+                        {% for categoria in categorias %}
+                            <option value="{{ categoria.id_categoria }}">{{ categoria.categoria }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label>Imagen (nombre de archivo)</label>
+                    <input type="text" name="url_imagen" placeholder="tomates.png" required>
+
+                    <label>Descuento % (opcional)</label>
+                    <input type="number" name="descuento" min="1" max="99" placeholder="Ej: 20">
+
+                    <button type="submit" class="btn-anadir">Guardar producto</button>
+                </form>
+            </div>
+            {% endif %}
+
         </div>
-        
+
         {% if session.get('es_admin') %}
         <div class="modal-overlay" id="modalEditar">
             <div class="modal-box">
-                <h2> Editar producto</h2>
+                <h2>Editar producto</h2>
                 <form id="formEditar" method="POST">
                     <label>Nombre</label>
                     <input type="text" name="nombre" id="edit-nombre" required>
                     <label>Precio (€)</label>
                     <input type="number" name="precio_unidad" id="edit-precio" step="0.01" min="0" required>
                     <label>Unidad de medida</label>
-                    <input type="text" name="unidad_medida" id="edit-unidad" required>
+                    <select name="unidad_medida" id="edit-unidad" required>
+                        <option value="" disabled selected>Seleccionar...</option>
+                        <option value="kg">kg</option>
+                        <option value="unidad">unidad</option>
+                        <option value="litro">litro</option>
+                        <option value="docena">docena</option>
+                        <option value="pack">pack</option>
+                    </select>
+                    
+                    <label>Categoría</label>
+                    <select name="id_categoria" id="edit-categoria" required>
+                        <option value="" disabled selected>Seleccionar...</option>
+                        {% for categoria in categorias %}
+                            <option value="{{ categoria.id_categoria }}">{{ categoria.categoria }}</option>
+                        {% endfor %}
+                    </select>
+                    
                     <label>Imagen (nombre de archivo)</label>
                     <input type="text" name="url_imagen" id="edit-imagen" required>
                     <div class="modal-acciones">
@@ -97,11 +179,11 @@
             </div>
         </div>
         {% endif %}
-        
+
         <div id="toast"></div>
     </main>
-    
-    <script src="../static/js/productos.js"></script>
-    <script src="../static/js/perfil.js"></script>
+
+    <script src="{{ url_for('static', filename='js/productos.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 </body>
 </html>

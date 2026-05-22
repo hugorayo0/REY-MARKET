@@ -5,20 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REY MARKET</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
 </head>
 <body>
  
     <header>
-        <a href="{{ url_for('Pagina_Principal') }}" class="logo">
+        <a href="{{ url_for('inicio') }}" class="logo">
             <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
         </a>
 
         <nav>
             <ul>
-                <li><a href="{{ url_for('Pagina_Principal') }}">Inicio</a></li>
+                <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
                 <li><a href="{{ url_for('productos') }}">Productos</a></li>
-                <li><a href="{{ url_for('ofertas') }}">Ofertas</a></li>
                 <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
                 <li style="position:relative;">
                     <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.4rem;position:relative;display:inline-block;color:white;text-decoration:none;padding:7px;">🛒
@@ -33,7 +32,9 @@
             <div class="perfil-menu" id="perfilMenu">
                 {% if session.get('nombre') %}
                     <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div>
+                     <a href="{{ url_for('historial') }}"> Historial de pedidos</a>
                     <a href="{{ url_for('logout') }}"> Cerrar sesión</a>
+                    
                 {% else %}
                     <a href="{{ url_for('login') }}"> Iniciar sesión</a>
                     <a href="{{ url_for('registro') }}"> Registrarse</a>
@@ -102,6 +103,6 @@
         </div>
     </main>
 
-    <script src="../static/js/perfil.js"></script>
+    <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 </body>
 </html>

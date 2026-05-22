@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Pedidos – REY MARKET</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('inicio') }}" class="logo">
+            <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
+        </a>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
+                <li><a href="{{ url_for('productos') }}">Productos</a></li>
+                <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
+                <li style="position:relative;">
+                    <a href="{{ url_for('carrito') }}"
+                       id="carrito-icon"
+                       style="font-size:1.4rem; position:relative; display:inline-block; color:white; text-decoration:none; padding:7px;">
+                        🛒
+                        <span
+                            id="carrito-badge"
+                            class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">
+                            {{ total_items_carrito }}
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="perfil-wrapper">
+            <button class="perfil-btn" onclick="togglePerfil()" title="Mi cuenta">👤</button>
+            <div class="perfil-menu" id="perfilMenu">
+                {% if session.get('nombre') %}
+                    <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div>
+                    <a href="{{ url_for('historial') }}"> Historial de pedidos</a>
+                    <a href="{{ url_for('logout') }}"> Cerrar sesión</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Iniciar sesión</a>
+                    <a href="{{ url_for('registro') }}">Registrarse</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h1> Mis últimos pedidos</h1>
+        <p>Aquí tienes un resumen de tus 5 pedidos más recientes.</p>
+
+        {% if historial %}
+            {% for pedido in historial %}
+            <div class="pedido-card" id="pedido-{{ pedido.id_pedido }}">
+
+                <div class="pedido-header" onclick="togglePedido('pedido-{{ pedido.id_pedido }}')">
+                    <div class="pedido-header-left">
+                        <span class="pedido-id">Pedido #{{ pedido.id_pedido }}</span>
+                        <span class="pedido-fecha">
+                            {{ pedido.fecha_pedido.strftime('%d de %B de %Y, %H:%M') if pedido.fecha_pedido else '—' }}
+                        </span>
+                    </div>
+                    <div class="pedido-header-right">
+                        <span class="estado-badge estado-{{ pedido.estado | lower }}">
+                            {% if pedido.estado == 'pendiente' %}⏳
+                            {% elif pedido.estado == 'enviado' %}🚚
+                            {% elif pedido.estado == 'entregado' %}✅
+                            {% elif pedido.estado == 'cancelado' %}❌
+                            {% endif %}
+                            {{ pedido.estado | capitalize }}
+                        </span>
+                        <span class="pedido-total">{{ "%.2f"|format(pedido.precio_total) }} €</span>
+                        <span class="toggle-arrow">▼</span>
+                    </div>
+                </div>
+
+                <div class="pedido-body">
+                    <div class="productos-lista">
+                        {% if pedido['items'] %}
+                            {% for item in pedido['items'] %}
+                            <div class="producto-fila">
+                                {% if item.url_imagen %}
+                                    <img
+                                        class="producto-img"
+                                        src="{{ item.url_imagen }}"
+                                        alt="{{ item.nombre }}"
+                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="producto-img-placeholder" style="display:none;">🛍️</div>
+                                {% else %}
+                                    <div class="producto-img-placeholder">🛍️</div>
+                                {% endif %}
+                                <div class="producto-info">
+                                    <div class="producto-nombre">{{ item.nombre }}</div>
+                                    <div class="producto-cantidad">Cantidad: {{ item.cantidad }}</div>
+                                </div>
+                                <div class="producto-precio">
+                                    {{ "%.2f"|format(item.precio_unidad * item.cantidad) }} €
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No hay detalles disponibles para este pedido.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="sin-pedidos">
+                <p>🛒 Todavía no tienes pedidos.</p>
+                <p>Cuando realices tu primera compra, aparecerá aquí.</p>
+                <a href="{{ url_for('productos') }}" class="btn-ver-productos">Ver productos</a>
+            </div>
+        {% endif %}
+
+    </main>
+
+    <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
+    <script>
+        function togglePedido(id) {
+            const card = document.getElementById(id);
+            card.classList.toggle('abierto');
+        }
+    </script>
+</body>
+</html>

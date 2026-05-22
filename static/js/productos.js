@@ -48,11 +48,12 @@ function AgregaralCarrito(btn, id, nombre, precio) {
     });
 }
 
-function abrirModal(id, nombre, precio, imagen, unidad) {
+function abrirModal(id, nombre, precio, imagen, unidad, categoria) {
     document.getElementById('edit-nombre').value = nombre;
     document.getElementById('edit-precio').value = precio;
     document.getElementById('edit-imagen').value = imagen;
     document.getElementById('edit-unidad').value = unidad;
+    document.getElementById('edit-categoria').value = categoria;
     document.getElementById('formEditar').action = '/admin/producto/editar/' + id;
     document.getElementById('modalEditar').classList.add('abierto');
 }
