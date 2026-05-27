@@ -1,13 +1,14 @@
 function filtrarCategoria(btn, categoria) {
     document.querySelectorAll('.categoria-btn').forEach(b => b.classList.remove('activo'));
     btn.classList.add('activo');
+    document.getElementById('buscador').value = '';
     document.querySelectorAll('.producto').forEach(prod => {
         prod.style.display = (categoria === 'todos' || prod.dataset.categoria === categoria) ? '' : 'none';
     });
 }
 
-function AgregaralCarrito(btn, id, nombre, precio) {
-    btn.textContent = '✓ Añadido';
+function AgregaralCarrito(btn, id, nombre, precio, descuento = 0) {
+    btn.textContent = '✔ Añadido';
     btn.disabled = true;
     btn.style.background = '#1b5e20';
     setTimeout(() => {
@@ -38,7 +39,7 @@ function AgregaralCarrito(btn, id, nombre, precio) {
     fetch('/carrito/agregar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, nombre, precio })
+        body: JSON.stringify({ id, nombre, precio, descuento })
     })
     .then(r => r.json())
     .then(data => {
@@ -64,4 +65,19 @@ function cerrarModal() {
 
 document.getElementById('modalEditar')?.addEventListener('click', function(e) {
     if (e.target === this) cerrarModal();
+});
+
+// Un solo listener para el buscador
+document.getElementById('buscador').addEventListener('input', function() {
+    const texto = this.value.toLowerCase().trim();
+
+    if (texto.length > 0) {
+        document.querySelectorAll('.categoria-btn').forEach(b => b.classList.remove('activo'));
+        document.querySelector('.categoria-btn').classList.add('activo');
+    }
+
+    document.querySelectorAll('.producto').forEach(function(producto) {
+        const nombre = producto.querySelector('h3').textContent.toLowerCase();
+        producto.style.display = nombre.includes(texto) ? '' : 'none';
+    });
 });

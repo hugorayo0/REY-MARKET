@@ -32,13 +32,21 @@
             <br>
             <br>
             <h2>Resumen del pedido</h2>
-            <p><strong>Número de pedido:</strong> #48291</p>
+            <p><strong>Número de pedido:</strong> #{{ id_pedido }}</p>
             <p><strong>Estado:</strong> Pagado</p>
             <p><strong>Método de pago:</strong> Tarjeta</p>
             <p><strong>Entrega estimada:</strong> 1-2 días</p>
         </div>
+        
+        <div id="recuadro-cookies" class="recuadro-cookies">
+            <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
+            <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
+            <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+        </div>
+        
     </main>
     
+    <script src="{{ url_for('static', filename='js/cookies.js') }}"></script>
     <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 </body>
 </html>

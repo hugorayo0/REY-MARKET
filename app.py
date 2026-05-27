@@ -46,13 +46,24 @@ def historial():
     historial = []
     for pedido in pedidos:
         cursor.execute(
-            """
-            SELECT pr.nombre, pr.url_imagen, pp.cantidad, pr.precio_unidad
-            FROM productos_pedidos pp
-            JOIN productos pr ON pp.id_producto = pr.id_producto
-            WHERE pp.id_pedido = %s
-            """,
-            (pedido['id_pedido'],)
+    """
+    SELECT 
+            pr.nombre, 
+            pr.url_imagen, 
+            pp.cantidad,
+            pr.precio_unidad,
+            d.descuento,
+            CASE 
+                 WHEN d.descuento IS NOT NULL 
+                THEN ROUND(pr.precio_unidad * (1 - d.descuento / 100), 2)
+                ELSE pr.precio_unidad
+            END AS precio_final
+        FROM productos_pedidos pp
+        JOIN productos pr ON pp.id_producto = pr.id_producto
+        LEFT JOIN descuentos d ON pr.id_descuento = d.id_descuento
+        WHERE pp.id_pedido = %s
+        """,
+        (pedido['id_pedido'],)
         )
         items = cursor.fetchall()
         historial.append({
@@ -496,6 +507,7 @@ def checkout():
                 
                 session['carrito'] = []
                 session.modified = True
+                session['ultimo_pedido'] = id_pedido
                 session['pedido_completado'] = True
                 return redirect(url_for('pago'))
 
@@ -573,6 +585,7 @@ def checkout():
             
             session['carrito'] = []
             session.modified = True
+            session['ultimo_pedido'] = id_pedido
             session['pedido_completado'] = True
             return redirect(url_for('pago'))
 
@@ -614,7 +627,10 @@ def pago():
         return redirect(url_for('login'))
     if not session.pop('pedido_completado', False):
         return redirect(url_for('productos'))
-    return render_template("pago.html")
+        
+    id_pedido = session.get('ultimo_pedido')
+    
+    return render_template("pago.html", id_pedido=id_pedido)
 
 
 # ───────────────── DIRECCIONES ─────────────────

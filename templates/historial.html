@@ -48,7 +48,7 @@
 
     <main>
         <h1> Mis últimos pedidos</h1>
-        <p>Aquí tienes un resumen de tus 5 pedidos más recientes.</p>
+        <p>Aquí tienes un resumen de tus 5 pedidos más recientes.</p><br>
 
         {% if historial %}
             {% for pedido in historial %}
@@ -81,10 +81,9 @@
                             {% for item in pedido['items'] %}
                             <div class="producto-fila">
                                 {% if item.url_imagen %}
-                                    <img
-                                        class="producto-img"
-                                        src="{{ item.url_imagen }}"
-                                        alt="{{ item.nombre }}"
+                                    <img class="producto-img" 
+                                            src="{{ url_for('static', filename='imagenes/' + item.url_imagen) }}" 
+                                            alt="{{ item.nombre }}"
                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     <div class="producto-img-placeholder" style="display:none;">🛍️</div>
                                 {% else %}
@@ -95,7 +94,7 @@
                                     <div class="producto-cantidad">Cantidad: {{ item.cantidad }}</div>
                                 </div>
                                 <div class="producto-precio">
-                                    {{ "%.2f"|format(item.precio_unidad * item.cantidad) }} €
+                                    {{ "%.2f"|format(item.precio_final * item.cantidad) }} €
                                 </div>
                             </div>
                             {% endfor %}
@@ -115,9 +114,16 @@
                 <a href="{{ url_for('productos') }}" class="btn-ver-productos">Ver productos</a>
             </div>
         {% endif %}
+        
+        <div id="recuadro-cookies" class="recuadro-cookies">
+            <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
+            <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
+            <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+        </div>
 
     </main>
-
+    
+    <script src="{{ url_for('static', filename='js/cookies.js') }}"></script>
     <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
     <script>
         function togglePedido(id) {

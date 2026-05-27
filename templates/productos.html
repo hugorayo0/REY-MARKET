@@ -57,6 +57,8 @@
                     <button class="categoria-btn" onclick="filtrarCategoria(this, 'conservas')">Conservas</button>
                 </div>
 
+                <input type="text" id="buscador" placeholder="Buscar producto..." class="buscador-input" autocomplete="off">
+
                 <div class="productos">
                     {% for producto in productos %}
                         {% if producto.descuento %}
@@ -64,15 +66,23 @@
                                 <span class="badge-oferta">-{{ producto.descuento }}%</span>
                                 <img src="{{ url_for('static', filename='imagenes/' + producto.url_imagen) }}" alt="{{ producto.nombre }}">
                                 <h3>{{ producto.nombre }}</h3>
-                                <p class="precio-original">{{ producto.precio_unidad }}€/{{ producto.unidad_medida }}</p>
-                                <p class="precio-producto">{{ "%.2f"|format(producto.precio_unidad|float * (1 - producto.descuento|float / 100)) }}€/{{ producto.unidad_medida }}</p>
+                                <div class="precios-producto">
+                                    <p class="precio-original">
+                                        {{ producto.precio_unidad }}€/{{ producto.unidad_medida }}
+                                    </p>
+                                    <p class="precio-producto">
+                                        {{ "%.2f"|format(producto.precio_unidad|float * (1 - producto.descuento|float / 100)) }}€/{{ producto.unidad_medida }}
+                                    </p>
+                                </div>
                                 {% if producto.fecha_fin %}
                                     <p class="oferta-fecha">Oferta válida hasta el {{ producto.fecha_fin }}</p>
                                 {% endif %}
                                 <button onclick="AgregaralCarrito(this, '{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ "%.2f"|format(producto.precio_unidad|float * (1 - producto.descuento|float / 100)) }}', '{{ producto.descuento }}')">Añadir al carrito</button>
                                 {% if session.get('es_admin') %}
                                 <div class="admin-acciones">
-                                    <button onclick="abrirModal('{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', '{{ producto.url_imagen }}', '{{ producto.unidad_medida }}', '{{ producto.id_categoria }}')">Editar</button>
+                                    <div style="flex:1; display:flex;">
+                                        <button class="btn-editar" style="width:100%" onclick="abrirModal('{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', '{{ producto.url_imagen }}', '{{ producto.unidad_medida }}', '{{ producto.id_categoria }}')">Editar</button>
+                                    </div>
                                     <form action="{{ url_for('eliminar_producto', id=producto.id_producto) }}" method="POST" onsubmit="return confirm('¿Eliminar {{ producto.nombre }}?')">
                                         <button type="submit" class="btn-eliminar">Eliminar</button>
                                     </form>
@@ -87,7 +97,9 @@
                                 <button onclick="AgregaralCarrito(this, '{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', 0)">Añadir al carrito</button>
                                 {% if session.get('es_admin') %}
                                 <div class="admin-acciones">
-                                    <button onclick="abrirModal('{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', '{{ producto.url_imagen }}', '{{ producto.unidad_medida }}', '{{ producto.id_categoria }}')">Editar</button>
+                                    <div style="flex:1; display:flex;">
+                                        <button class="btn-editar" style="width:100%" onclick="abrirModal('{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', '{{ producto.url_imagen }}', '{{ producto.unidad_medida }}', '{{ producto.id_categoria }}')">Editar</button>
+                                    </div>
                                     <form action="{{ url_for('eliminar_producto', id=producto.id_producto) }}" method="POST" onsubmit="return confirm('¿Eliminar {{ producto.nombre }}?')">
                                         <button type="submit" class="btn-eliminar">Eliminar</button>
                                     </form>
@@ -104,7 +116,6 @@
             <div class="panel-admin">
                 <h2>Añadir producto</h2>
                 <form action="{{ url_for('anadir_producto') }}" method="POST">
-
                     <label>Nombre</label>
                     <input type="text" name="nombre" placeholder="Ej: Tomates cherry" required>
 
@@ -149,8 +160,10 @@
                 <form id="formEditar" method="POST">
                     <label>Nombre</label>
                     <input type="text" name="nombre" id="edit-nombre" required>
+
                     <label>Precio (€)</label>
                     <input type="number" name="precio_unidad" id="edit-precio" step="0.01" min="0" required>
+
                     <label>Unidad de medida</label>
                     <select name="unidad_medida" id="edit-unidad" required>
                         <option value="" disabled selected>Seleccionar...</option>
@@ -160,7 +173,7 @@
                         <option value="docena">docena</option>
                         <option value="pack">pack</option>
                     </select>
-                    
+
                     <label>Categoría</label>
                     <select name="id_categoria" id="edit-categoria" required>
                         <option value="" disabled selected>Seleccionar...</option>
@@ -168,9 +181,10 @@
                             <option value="{{ categoria.id_categoria }}">{{ categoria.categoria }}</option>
                         {% endfor %}
                     </select>
-                    
+
                     <label>Imagen (nombre de archivo)</label>
                     <input type="text" name="url_imagen" id="edit-imagen" required>
+
                     <div class="modal-acciones">
                         <button type="button" class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
                         <button type="submit">Guardar</button>
@@ -181,8 +195,16 @@
         {% endif %}
 
         <div id="toast"></div>
+
+        <div id="recuadro-cookies" class="recuadro-cookies">
+            <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
+            <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
+            <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+        </div>
+
     </main>
 
+    <script src="{{ url_for('static', filename='js/cookies.js') }}"></script>
     <script src="{{ url_for('static', filename='js/productos.js') }}"></script>
     <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 </body>

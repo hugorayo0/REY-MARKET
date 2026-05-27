@@ -41,220 +41,204 @@
         </div>
     </header>
 
-<main class="carrito-page">
-    <h1 class="carrito-titulo">Tu carrito</h1>
-
-    {% if not carrito %}
-        <div class="carrito-vacio">
-            <p class="carrito-vacio-icon">🛒</p>
-            <p>Tu carrito está vacío</p><br>
-            <a href="{{ url_for('productos') }}" class="btn-primary">Ver productos</a>
-        </div>
-    {% else %}
-        <div class="carrito-layout">
-
-            <div class="carrito-items">
-                {% for item in carrito %}
-                <div class="carrito-item">
-                    <div class="item-info">
-                        <p class="item-nombre">{{ item.nombre }}</p>
-                        <p class="item-precio-unit">{{ item.precio }}€ / ud.</p>
-                    </div>
-                    <div class="item-controles">
-                        <a href="{{ url_for('restar_carrito', id=item.id) }}" class="ctrl-btn">−</a>
-                        <span class="item-cantidad">{{ item.cantidad }}</span>
-                        <a href="{{ url_for('sumar_carrito', id=item.id) }}" class="ctrl-btn">+</a>
-                    </div>
-                    <div class="item-subtotal">
-                        {{ "%.2f"|format(item.precio|float * item.cantidad|int) }}€
-                    </div>
-                    <a href="{{ url_for('eliminar_carrito', id=item.id) }}" class="item-eliminar" title="Eliminar">✕</a>
-                </div>
-                {% endfor %}
-
-                <a href="{{ url_for('productos') }}" class="btn-secondary btn-seguir">+ Seguir comprando</a>
+    <main class="carrito-page">
+        <h1 class="carrito-titulo">Tu carrito</h1>
+    
+        {% if not carrito %}
+            <div class="carrito-vacio">
+                <p class="carrito-vacio-icon">🛒</p>
+                <p>Tu carrito está vacío</p><br>
+                <a href="{{ url_for('productos') }}" class="btn-primary">Ver productos</a>
             </div>
-
-            <div class="carrito-resumen">
-                <h2>Resumen del pedido</h2>
-                <div class="resumen-linea">
-                    <span>Artículos</span>
-                    <span>{{ total_items_carrito }}</span>
-                </div>
-                <div class="resumen-linea">
-                    <span>Subtotal</span>
-                    <span>{{ "%.2f"|format(subtotal) }}€</span>
-                </div>
-                <div class="resumen-linea">
-                    <span>Envío</span>
-                    <span class="{{ 'texto-verde' if envio == 0 }}">
-                        {% if envio == 0 %}Gratis{% else %}{{ "%.2f"|format(envio) }}€{% endif %}
-                    </span>
-                </div>
-                {% if envio > 0 %}
-                <p class="resumen-envio-aviso">
-                    Te faltan {{ "%.2f"|format(30 - subtotal) }}€ para envío gratis
-                </p>
-                {% endif %}
-                <div class="resumen-total">
-                    <span>Total</span>
-                    <span>{{ "%.2f"|format(total) }}€</span>
-                </div>
-
-                {% if direcciones %}
-                <div class="direcciones-guardadas">
-                    <h3>Dirección de entrega</h3>
-                    {% for d in direcciones %}
-                    <div class="btn-direccion"
-                        data-nombre="{{ d.nombre_entrega }}"
-                        data-id="{{ d.id_direccion }}"
-                        data-calle="{{ d.calle_entrega }}"
-                        data-portal="{{ d.portal_entrega }}"
-                        data-piso="{{ d.piso_entrega }}"
-                        data-puerta="{{ d.puerta_entrega }}"
-                        data-localidad="{{ d.localidad_entrega }}"
-                        data-provincia="{{ d.provincia_entrega }}"
-                        data-cp="{{ d.cp_entrega }}"
-                        onclick="seleccionarDireccion(this)">
-
-                        <div class="dir-radio"></div>
-
-                        <div class="dir-texto">
-                            👤 {{ d.nombre_entrega }}<br/>
-                            📍{{ d.calle_entrega }},
-                            portal {{ d.portal_entrega }}, 
-                            piso {{ d.piso_entrega }} {{ d.puerta_entrega }},
-                            {{ d.cp_entrega }}
-                            {{ d.localidad_entrega }},
-                            {{ d.provincia_entrega }}
+        {% else %}
+            <div class="carrito-layout">
+    
+                <div class="carrito-items">
+                    {% for item in carrito %}
+                    <div class="carrito-item">
+                        <div class="item-info">
+                            <p class="item-nombre">{{ item.nombre }}</p>
+                            <p class="item-precio-unit">{{ item.precio }}€ / ud.</p>
                         </div>
-
-                        <div class="dir-acciones">
-                            <button type="button" class="dir-btn-accion editar"
-                                onclick="abrirEditar(event, this.closest('.btn-direccion'))">
-                                ✏️ Editar
-                            </button>
-                            <button type="button" class="dir-btn-accion eliminar"
-                                onclick="abrirEliminar(event, {{ d.id_direccion }})">
-                                🗑 Eliminar
-                            </button>
+                        <div class="item-controles">
+                            <a href="{{ url_for('restar_carrito', id=item.id) }}" class="ctrl-btn">−</a>
+                            <span class="item-cantidad">{{ item.cantidad }}</span>
+                            <a href="{{ url_for('sumar_carrito', id=item.id) }}" class="ctrl-btn">+</a>
                         </div>
+                        <div class="item-subtotal">
+                            {{ "%.2f"|format(item.precio|float * item.cantidad|int) }}€
+                        </div>
+                        <a href="{{ url_for('eliminar_carrito', id=item.id) }}" class="item-eliminar" title="Eliminar">✕</a>
                     </div>
                     {% endfor %}
-
-                    <p class="resumen-dir-aviso">¿Otra dirección? Añádela en el siguiente paso.</p>
-                    <a href="{{ url_for('checkout') }}" class="btn-secondary btn-nueva-dir">+ Añadir nueva dirección</a>
+    
+                    <a href="{{ url_for('productos') }}" class="btn-secondary btn-seguir">+ Seguir comprando</a>
                 </div>
-                {% endif %}
-
-                {% if not direcciones %}
-                <a href="{{ url_for('checkout') }}" class="btn-secondary" style="display:block; text-align:center; margin-bottom:10px;">
-                    + Añadir dirección de entrega
-                </a>
-                {% endif %}
-
-                <form action="{{ url_for('checkout') }}" method="post" id="form-carrito" onsubmit="
-                    if (!document.getElementById('id_direccion_seleccionada').value) {
-                        alert('Por favor selecciona una dirección de entrega');
-                        return false;
-                    }
-                ">
-                    <input type="hidden" name="id_direccion" id="id_direccion_seleccionada">
-                    <button type="submit" class="btn-primary btn-checkout">Finalizar compra →</button>
+    
+                <div class="carrito-resumen">
+                    <h2>Resumen del pedido</h2>
+                    <div class="resumen-linea">
+                        <span>Artículos</span>
+                        <span>{{ total_items_carrito }}</span>
+                    </div>
+                    <div class="resumen-linea">
+                        <span>Subtotal</span>
+                        <span>{{ "%.2f"|format(subtotal) }}€</span>
+                    </div>
+                    <div class="resumen-linea">
+                        <span>Envío</span>
+                        <span class="{{ 'texto-verde' if envio == 0 }}">
+                            {% if envio == 0 %}Gratis{% else %}{{ "%.2f"|format(envio) }}€{% endif %}
+                        </span>
+                    </div>
+                    {% if envio > 0 %}
+                    <p class="resumen-envio-aviso">
+                        Te faltan {{ "%.2f"|format(30 - subtotal) }}€ para envío gratis
+                    </p>
+                    {% endif %}
+                    <div class="resumen-total">
+                        <span>Total</span>
+                        <span>{{ "%.2f"|format(total) }}€</span>
+                    </div>
+    
+                    {% if direcciones %}
+                    <div class="direcciones-guardadas">
+                        <h3>Dirección de entrega</h3>
+                        {% for d in direcciones %}
+                        <div class="btn-direccion"
+                            data-nombre="{{ d.nombre_entrega }}"
+                            data-id="{{ d.id_direccion }}"
+                            data-calle="{{ d.calle_entrega }}"
+                            data-portal="{{ d.portal_entrega }}"
+                            data-piso="{{ d.piso_entrega }}"
+                            data-puerta="{{ d.puerta_entrega }}"
+                            data-localidad="{{ d.localidad_entrega }}"
+                            data-provincia="{{ d.provincia_entrega }}"
+                            data-cp="{{ d.cp_entrega }}"
+                            onclick="seleccionarDireccion(this)">
+    
+                            <div class="dir-radio"></div>
+    
+                            <div class="dir-texto">
+                                👤 {{ d.nombre_entrega }}<br/>
+                                📍{{ d.calle_entrega }},
+                                portal {{ d.portal_entrega }}, 
+                                piso {{ d.piso_entrega }} {{ d.puerta_entrega }},
+                                {{ d.cp_entrega }}
+                                {{ d.localidad_entrega }},
+                                {{ d.provincia_entrega }}
+                            </div>
+    
+                            <div class="dir-acciones">
+                                <button type="button" class="dir-btn-accion editar"
+                                    onclick="abrirEditar(event, this.closest('.btn-direccion'))">
+                                    ✏️ Editar
+                                </button>
+                                <button type="button" class="dir-btn-accion eliminar"
+                                    onclick="abrirEliminar(event, {{ d.id_direccion }})">
+                                    🗑 Eliminar
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+    
+                        <p class="resumen-dir-aviso">¿Otra dirección? Añádela en el siguiente paso.</p>
+                        <a href="{{ url_for('checkout') }}" class="btn-secondary btn-nueva-dir">+ Añadir nueva dirección</a>
+                    </div>
+                    {% endif %}
+    
+                    {% if not direcciones %}
+                    <a href="{{ url_for('checkout') }}" class="btn-secondary" style="display:block; text-align:center; margin-bottom:10px;">
+                        + Añadir dirección de entrega
+                    </a>
+                    {% endif %}
+    
+                    <form action="{{ url_for('checkout') }}" method="post" id="form-carrito" onsubmit="
+                        if (!document.getElementById('id_direccion_seleccionada').value) {
+                            alert('Por favor selecciona una dirección de entrega');
+                            return false;
+                        }
+                    ">
+                        <input type="hidden" name="id_direccion" id="id_direccion_seleccionada">
+                        <button type="submit" class="btn-primary btn-checkout">Finalizar compra →</button>
+                    </form>
+    
+                </div>
+    
+            </div>
+        {% endif %}
+    
+        <!-- ===== Modal EDITAR dirección ===== -->
+        <div id="modalEditar">
+            <div style="background:#fff; border-radius:12px; padding:2rem; width:90%; max-width:480px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+                <h3 style="margin:0 0 1.2rem;font-size:1.2rem;color:#1a1a1a;">✏️ Editar dirección</h3>
+                <form action="{{ url_for('checkout') }}" method="post">
+                    <input type="hidden" name="id_direccion_editar" id="edit-id">
+                    <div style="margin-bottom:0.8rem;">
+                        <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Nombre</label>
+                        <input type="text" name="nombre_entrega" id="edit-nombre" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.8rem;">
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Calle</label>
+                            <input type="text" name="calle_entrega" id="edit-calle" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Portal</label>
+                            <input type="text" name="portal_entrega" id="edit-portal" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Piso</label>
+                            <input type="text" name="piso_entrega" id="edit-piso" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Puerta</label>
+                            <input type="text" name="puerta_entrega" id="edit-puerta" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">CP</label>
+                            <input type="text" name="cp_entrega" id="edit-cp" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Localidad</label>
+                            <input type="text" name="localidad_entrega" id="edit-localidad" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <div style="margin-bottom:1.4rem;">
+                        <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Provincia</label>
+                        <input type="text" name="provincia_entrega" id="edit-provincia" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                    </div>
+        
+                    <div style="display:flex;gap:0.8rem;justify-content:flex-end;">
+                        <button type="button" onclick="cerrarEditar()" style="padding:9px 20px; border:1.5px solid #ddd; background:#fff; border-radius:7px; font-size:0.95rem; cursor:pointer; color:#555;">Cancelar</button>
+                        <button type="submit" style="padding:9px 20px; background:#2d7a2d; color:#fff; border:none; border-radius:7px; font-size:0.95rem; font-weight:600; cursor:pointer;">Guardar cambios</button>
+                    </div>
                 </form>
-
             </div>
-
         </div>
-    {% endif %}
-</main>
-
-<!-- ===== Modal EDITAR dirección ===== -->
-<div id="modalEditar">
-    <div style="
-        background:#fff;
-        border-radius:12px;
-        padding:2rem;
-        width:90%;
-        max-width:480px;
-        box-shadow:0 8px 32px rgba(0,0,0,0.18);
-    ">
-        <h3 style="margin:0 0 1.2rem;font-size:1.2rem;color:#1a1a1a;">✏️ Editar dirección</h3>
-        <form action="{{ url_for('checkout') }}" method="post">
-            <input type="hidden" name="id_direccion_editar" id="edit-id">
-            <div style="margin-bottom:0.8rem;">
-    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Nombre</label>
-    <input type="text" name="nombre_entrega" id="edit-nombre" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
-</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.8rem;">
-                <div>
-                    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Calle</label>
-                    <input type="text" name="calle_entrega" id="edit-calle" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
-                </div>
-                <div>
-                    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Portal</label>
-                    <input type="text" name="portal_entrega" id="edit-portal" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
-                </div>
-                <div>
-                    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Piso</label>
-                    <input type="text" name="piso_entrega" id="edit-piso" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
-                </div>
-                <div>
-                    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Puerta</label>
-                    <input type="text" name="puerta_entrega" id="edit-puerta" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
-                </div>
-                <div>
-                    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">CP</label>
-                    <input type="text" name="cp_entrega" id="edit-cp" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
-                </div>
-                <div>
-                    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Localidad</label>
-                    <input type="text" name="localidad_entrega" id="edit-localidad" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+    
+        <!-- ===== Modal CONFIRMAR eliminación ===== -->
+        <div class="confirm-overlay" id="confirmEliminar">
+            <div class="confirm-box">
+                <p>¿Eliminar esta dirección guardada?</p>
+                <div class="confirm-acciones">
+                    <button class="confirm-btn-no" onclick="cerrarConfirm()">Cancelar</button>
+                    <button class="confirm-btn-si" onclick="confirmarEliminar()">Eliminar</button>
                 </div>
             </div>
-            <div style="margin-bottom:1.4rem;">
-                <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Provincia</label>
-                <input type="text" name="provincia_entrega" id="edit-provincia" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
-            </div>
-
-            <div style="display:flex;gap:0.8rem;justify-content:flex-end;">
-                <button type="button" onclick="cerrarEditar()" style="
-                    padding:9px 20px;
-                    border:1.5px solid #ddd;
-                    background:#fff;
-                    border-radius:7px;
-                    font-size:0.95rem;
-                    cursor:pointer;
-                    color:#555;
-                ">Cancelar</button>
-                <button type="submit" style="
-                    padding:9px 20px;
-                    background:#2d7a2d;
-                    color:#fff;
-                    border:none;
-                    border-radius:7px;
-                    font-size:0.95rem;
-                    font-weight:600;
-                    cursor:pointer;
-                ">Guardar cambios</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ===== Modal CONFIRMAR eliminación ===== -->
-<div class="confirm-overlay" id="confirmEliminar">
-    <div class="confirm-box">
-        <p>¿Eliminar esta dirección guardada?</p>
-        <div class="confirm-acciones">
-            <button class="confirm-btn-no" onclick="cerrarConfirm()">Cancelar</button>
-            <button class="confirm-btn-si" onclick="confirmarEliminar()">Eliminar</button>
         </div>
-    </div>
-</div>
-
-<script src="{{ url_for('static', filename='js/carrito.js') }}"></script>
-<script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
+    
+        <div id="recuadro-cookies" class="recuadro-cookies">
+            <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
+            <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
+            <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+        </div>
+    
+    </main>
+    
+    <script src="{{ url_for('static', filename='js/cookies.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/carrito.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 
 </body>
 </html>

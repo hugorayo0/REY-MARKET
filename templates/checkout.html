@@ -47,7 +47,6 @@
     <main>
         <div class="checkout-container">
 
-
             {% if error %}
                 <p style="background:#383838; color:#fff; padding:12px 20px; border-radius:8px; text-align:center; margin-bottom:16px;">❌ {{ error }}</p>
             {% endif %}
@@ -109,18 +108,22 @@
                 </label>
                 {% endif %}
 
-                <button type="submit" id="btn-pago" onclick="
-    document.getElementById('btn-pago').innerText = 'Procesando...';
-">
-    {% if editar_direccion %}Guardar cambios y continuar{% else %}Proceder al pago{% endif %}
-</button>
+                <button type="submit" id="btn-pago" onclick="document.getElementById('btn-pago').innerText = 'Procesando...';">{% if editar_direccion %}Guardar cambios y continuar{% else %}Proceder al pago{% endif %}</button>
 
-                <a href="{{ url_for('carrito') }}" class="btn-secondary"
-                   style="display:block; text-align:center; margin-top:10px;">← Volver al carrito</a>
+                <a href="{{ url_for('carrito') }}" class="btn-secondary" style="display:block; text-align:center; margin-top:10px;">← Volver al carrito</a>
 
             </form>
         </div>
+        
+        <div id="recuadro-cookies" class="recuadro-cookies">
+            <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
+            <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
+            <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+        </div>
+        
     </main>
+    
+    <script src="{{ url_for('static', filename='js/cookies.js') }}"></script>
     <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
     <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 </body>
