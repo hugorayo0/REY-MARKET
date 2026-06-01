@@ -16,7 +16,6 @@ function AgregaralCarrito(btn, id, nombre, precio, descuento = 0) {
         btn.style.background = '';
         btn.disabled = false;
     }, 1500);
-
     const carritoIcon = document.getElementById('carrito-icon');
     const btnRect = btn.getBoundingClientRect();
     const carritoRect = carritoIcon.getBoundingClientRect();
@@ -35,11 +34,10 @@ function AgregaralCarrito(btn, id, nombre, precio, descuento = 0) {
         carritoIcon.classList.add('shake');
         setTimeout(() => carritoIcon.classList.remove('shake'), 500);
     });
-
     fetch('/carrito/agregar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, nombre, precio, descuento })
+        body: JSON.stringify({ id })
     })
     .then(r => r.json())
     .then(data => {
@@ -49,12 +47,15 @@ function AgregaralCarrito(btn, id, nombre, precio, descuento = 0) {
     });
 }
 
-function abrirModal(id, nombre, precio, imagen, unidad, categoria) {
+function abrirModal(id, nombre, precio, imagen, unidad, categoria, descuento, fechaFin, estado) {
     document.getElementById('edit-nombre').value = nombre;
     document.getElementById('edit-precio').value = precio;
     document.getElementById('edit-imagen').value = imagen;
     document.getElementById('edit-unidad').value = unidad;
     document.getElementById('edit-categoria').value = categoria;
+    document.getElementById('edit-descuento').value = descuento || 0;
+    document.getElementById('edit-fecha-fin').value = fechaFin || '';
+    document.getElementById('edit-estado').value = estado;
     document.getElementById('formEditar').action = '/admin/producto/editar/' + id;
     document.getElementById('modalEditar').classList.add('abierto');
 }
@@ -67,17 +68,25 @@ document.getElementById('modalEditar')?.addEventListener('click', function(e) {
     if (e.target === this) cerrarModal();
 });
 
-// Un solo listener para el buscador
 document.getElementById('buscador').addEventListener('input', function() {
     const texto = this.value.toLowerCase().trim();
-
     if (texto.length > 0) {
         document.querySelectorAll('.categoria-btn').forEach(b => b.classList.remove('activo'));
         document.querySelector('.categoria-btn').classList.add('activo');
     }
-
     document.querySelectorAll('.producto').forEach(function(producto) {
         const nombre = producto.querySelector('h3').textContent.toLowerCase();
         producto.style.display = nombre.includes(texto) ? '' : 'none';
     });
+});
+
+document.getElementById('input-descuento').addEventListener('input', function() {
+    const descuento = this.value.trim();
+    const inputFecha = document.getElementById('input-fecha');
+    
+    if (descuento.length > 0) {
+        inputFecha.required = true;
+    } else {
+        inputFecha.required = false;
+    }
 });

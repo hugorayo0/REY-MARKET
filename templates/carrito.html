@@ -58,7 +58,7 @@
                     <div class="carrito-item">
                         <div class="item-info">
                             <p class="item-nombre">{{ item.nombre }}</p>
-                            <p class="item-precio-unit">{{ item.precio }}€ / ud.</p>
+                            <p class="item-precio-unit">{{ "%.2f"|format(item.precio|float) }}€ / ud.</p>
                         </div>
                         <div class="item-controles">
                             <a href="{{ url_for('restar_carrito', id=item.id) }}" class="ctrl-btn">−</a>
@@ -141,14 +141,40 @@
                             </div>
                         </div>
                         {% endfor %}
+                        
+                        {% if session.get('direccion_temporal') %}
+                        <div class="btn-direccion"
+                            data-id="temporal"
+                            onclick="seleccionarDireccion(this)">
+                            
+                            <div class="dir-radio"></div>
+                            
+                            <div class="dir-texto">
+                                👤 {{ session['direccion_temporal']['nombre'] }}<br/>
+                                📍{{ session['direccion_temporal']['calle'] }},
+                                portal {{ session['direccion_temporal']['portal'] }},
+                                piso {{ session['direccion_temporal']['piso'] }}
+                                {{ session['direccion_temporal']['puerta'] }},
+                                {{ session['direccion_temporal']['cp'] }}
+                                {{ session['direccion_temporal']['localidad'] }},
+                                {{ session['direccion_temporal']['provincia'] }}
+                                <br><strong>(Dirección temporal)</strong>
+                            </div>
+                        </div>
+                        {% endif %}
     
-                        <p class="resumen-dir-aviso">¿Otra dirección? Añádela en el siguiente paso.</p>
-                        <a href="{{ url_for('checkout') }}" class="btn-secondary btn-nueva-dir">+ Añadir nueva dirección</a>
+                        <p class="resumen-dir-aviso">¿Otra dirección? Añádela aquí.</p>
+                        {% if session.get('direccion_temporal') %}
+                        <p style="font-size:12px; color:#f57c00; margin-bottom:8px;">
+                            ⚠️ Ya tienes una dirección temporal guardada. Si añades otra la reemplazará.
+                        </p>
+                        {% endif %}
+                        <a href="#" onclick="abrirNueva(event)" class="btn-secondary btn-nueva-dir">+ Añadir nueva dirección</a>
                     </div>
                     {% endif %}
     
                     {% if not direcciones %}
-                    <a href="{{ url_for('checkout') }}" class="btn-secondary" style="display:block; text-align:center; margin-bottom:10px;">
+                    <a href="#" onclick="abrirNueva(event)" class="btn-secondary" style="display:block; text-align:center; margin-bottom:10px;">
                         + Añadir dirección de entrega
                     </a>
                     {% endif %}
@@ -171,14 +197,14 @@
         <!-- ===== Modal EDITAR dirección ===== -->
         <div id="modalEditar">
             <div style="background:#fff; border-radius:12px; padding:2rem; width:90%; max-width:480px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
-                <h3 style="margin:0 0 1.2rem;font-size:1.2rem;color:#1a1a1a;">✏️ Editar dirección</h3>
-                <form action="{{ url_for('checkout') }}" method="post">
+                <h3 style="margin:0 0 1.2rem;font-size:1.2rem;color:#1a1a1a;">Editar dirección</h3>
+                <form action="{{ url_for('editar_direccion') }}" method="post">
                     <input type="hidden" name="id_direccion_editar" id="edit-id">
-                    <div style="margin-bottom:0.8rem;">
+                    <div style="margin-bottom:4px;">
                         <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Nombre</label>
                         <input type="text" name="nombre_entrega" id="edit-nombre" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.8rem;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:4px;">
                         <div>
                             <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Calle</label>
                             <input type="text" name="calle_entrega" id="edit-calle" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
@@ -196,7 +222,7 @@
                             <input type="text" name="puerta_entrega" id="edit-puerta" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
                         </div>
                         <div>
-                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">CP</label>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Codigo Postal</label>
                             <input type="text" name="cp_entrega" id="edit-cp" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
                         </div>
                         <div>
@@ -204,9 +230,19 @@
                             <input type="text" name="localidad_entrega" id="edit-localidad" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
                         </div>
                     </div>
-                    <div style="margin-bottom:1.4rem;">
+                    <div style="margin-bottom:4px;">
                         <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Provincia</label>
-                        <input type="text" name="provincia_entrega" id="edit-provincia" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        <select name="provincia_entrega" id="edit-provincia" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;background-color: #fff;">
+                            <option value="" disabled selected>Seleccionar...</option>
+                            <option value="Araba/Álava">Araba / Álava</option>
+                            <option value="Bizkaia/Vizcaya">Bizkaia / Vizcaya</option>
+                            <option value="Gipuzkoa/Guipúzcoa">Gipuzkoa / Guipúzcoa</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-top:4px;">
+                        <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Información opcional</label>
+                        <input type="text" name="info_opcional_entrega" id="infoopcional" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
                     </div>
         
                     <div style="display:flex;gap:0.8rem;justify-content:flex-end;">
@@ -217,6 +253,69 @@
             </div>
         </div>
     
+        <!-- ===== Modal NUEVA dirección ===== -->
+        <div id="modalNueva">
+            <div style="background:#fff; border-radius:12px; padding:2rem; width:90%; max-width:480px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+                <h3 style="margin:0 0 1.2rem;font-size:1.2rem;color:#1a1a1a;">Nueva dirección</h3>
+                <form action="{{ url_for('nueva_direccion') }}" method="post">
+                    <div style="margin-bottom:4px;">
+                        <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Nombre</label>
+                        <input type="text" name="nombre_entrega" placeholder="Tu nombre" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:4px;">
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Calle</label>
+                            <input type="text" name="calle_entrega" placeholder="Ej: Plaza de España" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Portal</label>
+                            <input type="text" name="portal_entrega" placeholder="Ej: 14" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Piso</label>
+                            <input type="text" name="piso_entrega" placeholder="Ej: 2" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Puerta</label>
+                            <input type="text" name="puerta_entrega" placeholder="Ej: A" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Codigo Postal</label>
+                            <input type="text" name="cp_entrega" placeholder="Ej: 20010" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Localidad</label>
+                            <input type="text" name="localidad_entrega" placeholder="Ej: San Sebastián" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <div style="margin-bottom:4px;">
+                        <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Provincia</label>
+                        <select name="provincia_entrega" id="edit-provincia" required style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;background-color: #fff;">
+                            <option value="" disabled selected>Seleccionar...</option>
+                            <option value="Araba/Álava">Araba / Álava</option>
+                            <option value="Bizkaia/Vizcaya">Bizkaia / Vizcaya</option>
+                            <option value="Gipuzkoa/Guipúzcoa">Gipuzkoa / Guipúzcoa</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Información opcional</label>
+                        <input type="text" name="info_opcional_entrega" id="infoopcional" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:0.95rem;box-sizing:border-box;">
+                    </div>
+                    
+                    <label style="display:flex; align-items:center; gap:8px; margin-top:12px; cursor:pointer;">
+                        <input type="checkbox" name="guardar_direccion" value="1">
+                        Guardar esta dirección para próximas compras
+                    </label>
+                    
+                    <div style="display:flex;gap:0.8rem;justify-content:flex-end;">
+                        <button type="button" onclick="cerrarNueva()" style="padding:9px 20px;border:1.5px solid #ddd;background:#fff;border-radius:7px;font-size:0.95rem;cursor:pointer;color:#555;">Cancelar</button>
+                        <button type="submit" style="padding:9px 20px;background:#2d7a2d;color:#fff;border:none;border-radius:7px;font-size:0.95rem;font-weight:600;cursor:pointer;">Guardar dirección</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- ===== Modal CONFIRMAR eliminación ===== -->
         <div class="confirm-overlay" id="confirmEliminar">
             <div class="confirm-box">
@@ -229,9 +328,16 @@
         </div>
     
         <div id="recuadro-cookies" class="recuadro-cookies">
-            <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
-            <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
-            <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+    
+            <div class="texto-cookies">
+                <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
+            </div>
+    
+            <div class="contenedor-botones-cookies">
+                <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
+                <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+            </div>
+    
         </div>
     
     </main>
@@ -239,6 +345,32 @@
     <script src="{{ url_for('static', filename='js/cookies.js') }}"></script>
     <script src="{{ url_for('static', filename='js/carrito.js') }}"></script>
     <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
+    <style>
+        #modalNueva {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        #modalNueva.abierto {
+            display: flex;
+        }
+    </style>
+    <script>
+        function abrirNueva(e) {
+            e.preventDefault();
+            document.getElementById('modalNueva').classList.add('abierto');
+        }
+        function cerrarNueva() {
+            document.getElementById('modalNueva').classList.remove('abierto');
+        }
+        document.getElementById('modalNueva').addEventListener('click', function(e) {
+            if (e.target === this) cerrarNueva();
+        });
+    </script>
 
 </body>
 </html>

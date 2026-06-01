@@ -61,7 +61,7 @@
 
                 <div class="productos">
                     {% for producto in productos %}
-                        {% if producto.descuento %}
+                        {% if producto.descuento and producto.estado == 'activo' %}
                             <div class="producto oferta-card" data-categoria="{{ producto.categoria }}">
                                 <span class="badge-oferta">-{{ producto.descuento }}%</span>
                                 <img src="{{ url_for('static', filename='imagenes/' + producto.url_imagen) }}" alt="{{ producto.nombre }}">
@@ -81,7 +81,7 @@
                                 {% if session.get('es_admin') %}
                                 <div class="admin-acciones">
                                     <div style="flex:1; display:flex;">
-                                        <button class="btn-editar" style="width:100%" onclick="abrirModal('{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', '{{ producto.url_imagen }}', '{{ producto.unidad_medida }}', '{{ producto.id_categoria }}')">Editar</button>
+                                        <button class="btn-editar" style="width:100%" onclick="abrirModal('{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', '{{ producto.url_imagen }}', '{{ producto.unidad_medida }}', '{{ producto.id_categoria }}', '{{ producto.descuento }}', '{{ producto.fecha_fin if producto.fecha_fin else "" }}', '{{ producto.estado }}')">Editar</button>
                                     </div>
                                     <form action="{{ url_for('eliminar_producto', id=producto.id_producto) }}" method="POST" onsubmit="return confirm('¿Eliminar {{ producto.nombre }}?')">
                                         <button type="submit" class="btn-eliminar">Eliminar</button>
@@ -98,7 +98,7 @@
                                 {% if session.get('es_admin') %}
                                 <div class="admin-acciones">
                                     <div style="flex:1; display:flex;">
-                                        <button class="btn-editar" style="width:100%" onclick="abrirModal('{{ producto.id_producto }}', '{{ producto.nombre }}', '{{ producto.precio_unidad }}', '{{ producto.url_imagen }}', '{{ producto.unidad_medida }}', '{{ producto.id_categoria }}')">Editar</button>
+                                        <button class="btn-editar" onclick="abrirModal('{{ producto.id_producto }}','{{ producto.nombre }}','{{ producto.precio_unidad }}','{{ producto.url_imagen }}','{{ producto.unidad_medida }}','{{ producto.id_categoria }}','{{ producto.descuento if producto.descuento else 0 }}','{{ producto.fecha_fin if producto.fecha_fin else "" }}','{{ producto.estado }}')">Editar</button>
                                     </div>
                                     <form action="{{ url_for('eliminar_producto', id=producto.id_producto) }}" method="POST" onsubmit="return confirm('¿Eliminar {{ producto.nombre }}?')">
                                         <button type="submit" class="btn-eliminar">Eliminar</button>
@@ -144,9 +144,12 @@
                     <input type="text" name="url_imagen" placeholder="tomates.png" required>
 
                     <label>Descuento % (opcional)</label>
-                    <input type="number" name="descuento" min="1" max="99" placeholder="Ej: 20">
+                    <input type="number" id="input-descuento" name="descuento" min="1" max="99" placeholder="Ej: 20">
 
-                    <button type="submit" class="btn-anadir">Guardar producto</button>
+                    <label>Fecha fin oferta (obligatorio si hay descuento)</label>
+                    <input type="date" id="input-fecha" name="fecha_fin">
+
+                    <button type="submit" class="btn-anadir">Añadir producto</button>
                 </form>
             </div>
             {% endif %}
@@ -185,6 +188,19 @@
                     <label>Imagen (nombre de archivo)</label>
                     <input type="text" name="url_imagen" id="edit-imagen" required>
 
+                    <div class="oferta-seccion">
+                        <div class="oferta-seccion-titulo"></div>
+                        <label>Descuento %</label>
+                        <input type="number" name="descuento" id="edit-descuento" min="0" max="99">
+                        <label>Fecha de caducidad de la oferta</label>
+                        <input type="date" name="fecha_fin" id="edit-fecha-fin">
+                        <label>Estado de la oferta</label>
+                        <select name="estado" id="edit-estado">
+                            <option value="activo">activo</option>
+                            <option value="desactivo">desactivo</option>
+                        </select>
+                    </div>
+
                     <div class="modal-acciones">
                         <button type="button" class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
                         <button type="submit">Guardar</button>
@@ -197,9 +213,16 @@
         <div id="toast"></div>
 
         <div id="recuadro-cookies" class="recuadro-cookies">
-            <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
-            <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
-            <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+    
+            <div class="texto-cookies">
+                <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
+            </div>
+    
+            <div class="contenedor-botones-cookies">
+                <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
+                <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+            </div>
+    
         </div>
 
     </main>

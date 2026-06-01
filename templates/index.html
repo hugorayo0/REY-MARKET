@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REY MARKET</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='imagenes/icono.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
 </head>
 <body>
     <header>
@@ -81,9 +81,16 @@
         </div>
         
         <div id="recuadro-cookies" class="recuadro-cookies">
-            <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
-            <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
-            <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+    
+            <div class="texto-cookies">
+                <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
+            </div>
+    
+            <div class="contenedor-botones-cookies">
+                <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
+                <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+            </div>
+    
         </div>
         
     </main>

@@ -614,14 +614,14 @@ input:focus {
 
 /* ===== OFERTAS ===== */
 .oferta-card {
-    border: 2px solid #f9a825;
+    border: 2px solid #2e7d32;
     position: relative;
 }
 
 .badge-oferta {
     position: absolute;
     top: 10px; right: 10px;
-    background: #f9a825;
+    background: #F1C40F;
     color: white;
     padding: 3px 8px;
     border-radius: 5px;
@@ -812,7 +812,7 @@ textarea:focus {
     padding: 28px 32px;
     width: 100%;
     max-width: 440px;
-    max-height: 90vh;
+    max-height: 95vh;
     overflow-y: auto;
     box-shadow: 0 8px 32px rgba(0,0,0,0.25);
     position: relative;
@@ -1031,6 +1031,15 @@ textarea:focus {
         font-size: 11px;
     }
     
+    .pagina-productos {
+      flex-direction: column;
+    }
+
+    .panel-admin {
+      width: 100%;
+      position: static;
+    }
+    
     /* --- PERFIL BTN (que no se corte) --- */
     .perfil-btn {
         width: 34px;
@@ -1108,7 +1117,26 @@ textarea:focus {
     
     /* Estilo de recuadro de las cookies */
     .recuadro-cookies {
-        left: 10px;
+        flex-direction: column;
+        text-align: center;
+        padding: 20px 16px;
+        gap: 16px;
+    }
+    
+    .contenedor-botones-cookies {
+        width: 100%;
+        flex-direction: column;
+        margin-left: 0;
+    }
+    
+    .texto-cookies {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0 20px;
+    }
+    
+    .boton-cookies {
+        width: 100%;
     }
 }
 
@@ -1183,22 +1211,13 @@ textarea:focus {
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
+    
 }
 
 .btn-anadir:hover {
     background: #1b5e20;
 }
 
-@media (max-width: 768px) {
-    .pagina-productos {
-      flex-direction: column;
-    }
-
-    .panel-admin {
-      width: 100%;
-      position: static;
-    }
-}
 #modalEditar {
     display: none;
     position: fixed;
@@ -1401,16 +1420,27 @@ textarea:focus {
     left: 0;
     bottom: 0;
     right: 0;
-    padding: 30px 0;
+    padding: 50px 0px;
+    background: #5959597f; 
     display: none;
-    flex-direction: column;
     width: 100%;
-    background: #5959597f;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+}
+
+.contenedor-botones-cookies {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    
 }
 
 .boton-cookies {
-    width: 200px;
-    margin-top: 10px;
+    height: 41.24px;
+    width: 100%;
+    max-width: 256.33px;
+    min-width: 160px;
     padding: 10px 16px;
     border: none;
     border-radius: 8px;
@@ -1425,4 +1455,28 @@ textarea:focus {
 
 .boton-cookies:hover {
     background: #1b5e20;
+}
+
+.texto-cookies {
+    width: 100%;
+    min-width: 318.98px;
+    max-width: 538.09px;
+    font-size: 15px;
+    line-height: 1.5;
+    text-align: left;
+    align-self: center
+}
+
+#modalNueva {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+#modalNueva.abierto {
+    display: flex;
 }

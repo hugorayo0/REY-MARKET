@@ -1,3 +1,6 @@
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import mysql.connector
 import db_helper
@@ -7,14 +10,13 @@ import os
 app = Flask(__name__)
 application = app
 
-
 app.secret_key = os.environ.get("SECRET_KEY")
 
 
 @app.route("/")
 def inicio():
     return render_template("index.html")
-    
+
 # ───────────────── HISTORIAL ─────────────────
 @app.route("/historial")
 def historial():
@@ -46,24 +48,24 @@ def historial():
     historial = []
     for pedido in pedidos:
         cursor.execute(
-    """
-    SELECT 
-            pr.nombre, 
-            pr.url_imagen, 
-            pp.cantidad,
-            pr.precio_unidad,
-            d.descuento,
-            CASE 
-                 WHEN d.descuento IS NOT NULL 
-                THEN ROUND(pr.precio_unidad * (1 - d.descuento / 100), 2)
-                ELSE pr.precio_unidad
-            END AS precio_final
-        FROM productos_pedidos pp
-        JOIN productos pr ON pp.id_producto = pr.id_producto
-        LEFT JOIN descuentos d ON pr.id_descuento = d.id_descuento
-        WHERE pp.id_pedido = %s
-        """,
-        (pedido['id_pedido'],)
+            """
+            SELECT 
+                pr.nombre, 
+                pr.url_imagen, 
+                pp.cantidad,
+                pr.precio_unidad,
+                d.descuento,
+                CASE 
+                    WHEN d.descuento IS NOT NULL 
+                    THEN ROUND(pr.precio_unidad * (1 - d.descuento / 100), 2)
+                    ELSE pr.precio_unidad
+                END AS precio_final
+            FROM productos_pedidos pp
+            JOIN productos pr ON pp.id_producto = pr.id_producto
+            LEFT JOIN descuentos d ON pr.id_descuento = d.id_descuento
+            WHERE pp.id_pedido = %s
+            """,
+            (pedido['id_pedido'],)
         )
         items = cursor.fetchall()
         historial.append({
@@ -79,8 +81,8 @@ def historial():
 
     return render_template("historial.html", historial=historial)
 
-# ───────────────── LOGIN ─────────────────
 
+# ───────────────── LOGIN ─────────────────
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -214,11 +216,9 @@ def productos():
     conexion, cursor = db_helper.get_db()
 
     cursor.execute("SELECT * FROM vista_productos;")
-
     productos = cursor.fetchall()
-    
-    cursor.execute("SELECT * FROM categorias;")
 
+    cursor.execute("SELECT * FROM categorias;")
     categorias = cursor.fetchall()
 
     cursor.close()
@@ -236,9 +236,44 @@ def cuenta():
     return render_template("cuenta.html")
 
 
-@app.route("/Contacto")
+@app.route("/Contacto", methods=['GET', 'POST'])
 def contacto():
-    return render_template("contacto.html")
+    mensaje_ok = False
+    error = None
+
+    if request.method == 'POST':
+        nombre  = request.form.get('nombre', '').strip()
+        email   = request.form.get('email', '').strip()
+        mensaje = request.form.get('mensaje', '').strip()
+
+        try:
+            msg = MIMEMultipart()
+            msg['From']    = 'damibonye@gmail.com'
+            msg['To']      = 'damibonye@gmail.com'
+            msg['Subject'] = f'Contacto web - {nombre}'
+            msg.attach(MIMEText(
+                f"Nombre: {nombre}\nEmail: {email}\n\nMensaje:\n{mensaje}",
+                'plain'
+            ))
+
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as servidor:
+                servidor.login(
+                    'damibonye@gmail.com',
+                    os.environ.get('EMAIL_PASSWORD')
+                )
+                servidor.sendmail(
+                    'damibonye@gmail.com',
+                    ['damibonye@gmail.com'],
+                    msg.as_string()
+                )
+            mensaje_ok = True
+
+        except Exception as e:
+            print("ERROR AL ENVIAR CORREO:", e)
+            error = "No se pudo enviar el mensaje. Inténtalo más tarde."
+
+    return render_template("contacto.html", mensaje_ok=mensaje_ok, error=error)
+
 
 
 # ───────────────── CARRITO ─────────────────
@@ -246,40 +281,70 @@ def contacto():
 @app.route("/carrito")
 def carrito():
 
-    carrito = session.get('carrito', [])
+    carrito_session = session.get('carrito', [])
 
-    subtotal = sum(
-        float(i['precio']) * int(i['cantidad'])
-        for i in carrito
-    )
+    productos_carrito = []
+
+    subtotal = 0
+
+    conexion, cursor = db_helper.get_db()
+
+    for item in carrito_session:
+
+        cursor.execute("""
+            SELECT *
+            FROM vista_productos
+            WHERE id_producto = %s
+        """, (item['id'],))
+
+        producto = cursor.fetchone()
+
+        if not producto:
+            continue
+
+        precio = float(producto['precio_unidad'])
+
+        if (
+            producto['descuento']
+            and producto['estado'] == 'activo'
+        ):
+            precio = precio * (
+                1 - float(producto['descuento']) / 100
+            )
+
+        precio = round(precio, 2)
+
+        subtotal_producto = precio * item['cantidad']
+
+        subtotal += subtotal_producto
+
+        productos_carrito.append({
+            'id': producto['id_producto'],
+            'nombre': producto['nombre'],
+            'precio': precio,
+            'cantidad': item['cantidad']
+        })
 
     envio = 0 if subtotal >= 30 else 3.99
-
     total = subtotal + envio
 
     direcciones = []
 
     if session.get('id_usuario'):
 
-        conexion, cursor = db_helper.get_db()
-
         cursor.execute(
-            """
-            SELECT *
-            FROM direcciones
-            WHERE id_usuario = %s
-            """,
+            "SELECT * FROM direcciones WHERE id_usuario = %s",
             (session['id_usuario'],)
         )
 
         direcciones = cursor.fetchall()
 
-        cursor.close()
-        conexion.close()
+    cursor.close()
+    conexion.close()
 
     return render_template(
         "carrito.html",
-        carrito=carrito,
+        carrito=productos_carrito,
         subtotal=subtotal,
         envio=envio,
         total=total,
@@ -292,33 +357,21 @@ def agregar_carrito():
 
     data = request.get_json()
 
-    id = data['id']
-    nombre = data['nombre']
-    precio = float(data['precio'])
-    descuento = int(data.get('descuento', 0) or 0)  # porcentaje, ej: 25
-
-    # Calcular precio final aplicando el descuento
-    if descuento > 0:
-        precio_final = round(precio * (1 - descuento / 100), 2)
-    else:
-        precio_final = precio
+    id_producto = int(data['id'])
 
     carrito = session.get('carrito', [])
 
-    for item in carrito:
+    encontrado = False
 
-        if item['id'] == id:
+    for item in carrito:
+        if item['id'] == id_producto:
             item['cantidad'] += 1
+            encontrado = True
             break
 
-    else:
-
+    if not encontrado:
         carrito.append({
-            'id': id,
-            'nombre': nombre,
-            'precio': precio_final,      # precio ya con descuento aplicado
-            'precio_original': precio,   # precio sin descuento (para mostrarlo tachado)
-            'descuento': descuento,      # % de descuento
+            'id': id_producto,
             'cantidad': 1
         })
 
@@ -333,13 +386,12 @@ def agregar_carrito():
     })
 
 
-@app.route("/carrito/sumar/<id>")
+@app.route("/carrito/sumar/<int:id>")
 def sumar_carrito(id):
 
     carrito = session.get('carrito', [])
 
     for item in carrito:
-
         if item['id'] == id:
             item['cantidad'] += 1
             break
@@ -350,20 +402,16 @@ def sumar_carrito(id):
     return redirect(url_for('carrito'))
 
 
-@app.route("/carrito/restar/<id>")
+@app.route("/carrito/restar/<int:id>")
 def restar_carrito(id):
 
     carrito = session.get('carrito', [])
 
     for item in carrito:
-
         if item['id'] == id:
-
             item['cantidad'] -= 1
-
             if item['cantidad'] <= 0:
                 carrito.remove(item)
-
             break
 
     session['carrito'] = carrito
@@ -372,7 +420,7 @@ def restar_carrito(id):
     return redirect(url_for('carrito'))
 
 
-@app.route("/carrito/eliminar/<id>")
+@app.route("/carrito/eliminar/<int:id>")
 def eliminar_carrito(id):
 
     carrito = session.get('carrito', [])
@@ -395,14 +443,40 @@ def checkout():
         return redirect(url_for("login"))
 
     carrito = session.get('carrito', [])
-
+    
+    conexion, cursor = db_helper.get_db()
+    
+    subtotal = 0
+    
+    for item in carrito:
+    
+        cursor.execute("""
+            SELECT *
+            FROM vista_productos
+            WHERE id_producto = %s
+        """, (item['id'],))
+    
+        producto = cursor.fetchone()
+    
+        if not producto:
+            continue
+    
+        precio = float(producto['precio_unidad'])
+    
+        if (
+            producto['descuento']
+            and producto['estado'] == 'activo'
+        ):
+            precio = precio * (
+                1 - float(producto['descuento']) / 100
+            )
+    
+        subtotal += precio * item['cantidad']
+    
     if not carrito:
         return redirect(url_for('productos'))
 
-    subtotal = sum(
-        float(i['precio']) * int(i['cantidad'])
-        for i in carrito
-    )
+    
 
     envio = 0 if subtotal >= 30 else 3.99
     total = subtotal + envio
@@ -430,7 +504,6 @@ def checkout():
             conexion, cursor = db_helper.get_db()
 
             try:
-
                 cursor.execute(
                     """
                     UPDATE direcciones
@@ -446,8 +519,8 @@ def checkout():
                     WHERE id_direccion=%s
                     AND id_usuario=%s
                     """,
-                    (   
-                        request.form.get('nombre_entrega','').strip(),
+                    (
+                        request.form.get('nombre_entrega', '').strip(),
                         request.form.get('calle_entrega', '').strip(),
                         request.form.get('portal_entrega', '').strip(),
                         request.form.get('piso_entrega', '').strip(),
@@ -459,16 +532,13 @@ def checkout():
                         session['id_usuario']
                     )
                 )
-
                 conexion.commit()
 
             except Exception as e:
-
                 print("ERROR AL EDITAR DIRECCIÓN:", e)
                 conexion.rollback()
 
             finally:
-
                 cursor.close()
                 conexion.close()
 
@@ -477,13 +547,17 @@ def checkout():
         # ─── USAR DIRECCIÓN GUARDADA ───
 
         id_direccion = request.form.get('id_direccion')
+        
+        if id_direccion == 'temporal':
+            id_direccion = None
+        
+        direccion_temporal = session.get('direccion_temporal')
 
-        if id_direccion:
+        if id_direccion or direccion_temporal:
 
             conexion, cursor = db_helper.get_db()
 
             try:
-
                 cursor.execute(
                     """
                     INSERT INTO pedidos (id_usuario, precio_total, fecha_pedido, estado)
@@ -492,9 +566,9 @@ def checkout():
                     (session['id_usuario'], total)
                 )
                 conexion.commit()
-                
+
                 id_pedido = cursor.lastrowid
-                
+
                 for item in carrito:
                     cursor.execute(
                         """
@@ -504,21 +578,20 @@ def checkout():
                         (id_pedido, int(item['id']), int(item['cantidad']))
                     )
                 conexion.commit()
-                
+
                 session['carrito'] = []
                 session.modified = True
                 session['ultimo_pedido'] = id_pedido
                 session['pedido_completado'] = True
+                session.pop('direccion_temporal', None)
                 return redirect(url_for('pago'))
 
             except Exception as e:
-
                 print("ERROR DETALLADO:", e)
                 conexion.rollback()
                 return redirect(url_for('carrito'))
 
             finally:
-
                 cursor.close()
                 conexion.close()
 
@@ -536,21 +609,11 @@ def checkout():
         guardar = request.form.get('guardar_direccion')
 
         if not all([calle, portal, piso, puerta, localidad, provincia, cp]):
-
-            return render_template(
-                "checkout.html",
-                carrito=carrito,
-                subtotal=subtotal,
-                envio=envio,
-                total=total,
-                direcciones=direcciones,
-                error="Por favor, rellena todos los campos obligatorios."
-            )
+            return redirect(url_for('carrito'))
 
         conexion, cursor = db_helper.get_db()
 
         try:
-
             if guardar:
                 cursor.execute(
                     """
@@ -561,7 +624,7 @@ def checkout():
                     (session['id_usuario'], nombre_entrega, calle, portal, piso, puerta, localidad, provincia, cp, informacion)
                 )
                 conexion.commit()
-            
+
             cursor.execute(
                 """
                 INSERT INTO pedidos (id_usuario, precio_total, fecha_pedido, estado)
@@ -570,9 +633,9 @@ def checkout():
                 (session['id_usuario'], total)
             )
             conexion.commit()
-            
+
             id_pedido = cursor.lastrowid
-            
+
             for item in carrito:
                 cursor.execute(
                     """
@@ -582,42 +645,148 @@ def checkout():
                     (id_pedido, int(item['id']), int(item['cantidad']))
                 )
             conexion.commit()
-            
+
             session['carrito'] = []
             session.modified = True
             session['ultimo_pedido'] = id_pedido
             session['pedido_completado'] = True
+            session.pop('direccion_temporal', None)
             return redirect(url_for('pago'))
 
         except Exception as e:
-
             print("ERROR DETALLADO:", e)
             conexion.rollback()
 
-            return render_template(
-                "checkout.html",
-                carrito=carrito,
-                subtotal=subtotal,
-                envio=envio,
-                total=total,
-                direcciones=direcciones,
-                error=f"Error: {e}"
-            )
+            return redirect(url_for('carrito'))
 
         finally:
-
             cursor.close()
             conexion.close()
 
-    return render_template(
-        "checkout.html",
-        carrito=carrito,
-        subtotal=subtotal,
-        envio=envio,
-        total=total,
-        direcciones=direcciones
-    )
+    return redirect(url_for('carrito'))
 
+# Para añadir nueva direccion
+@app.route('/direccion/nueva', methods=['POST'])
+def nueva_direccion():
+
+    if 'id_usuario' not in session:
+        return redirect(url_for('login'))
+
+    nombre = request.form['nombre_entrega']
+    calle = request.form['calle_entrega']
+    portal = request.form['portal_entrega']
+    piso = request.form['piso_entrega']
+    puerta = request.form['puerta_entrega']
+    localidad = request.form['localidad_entrega']
+    provincia = request.form['provincia_entrega']
+    cp = request.form['cp_entrega']
+    info = request.form.get('info_opcional_entrega')
+
+    guardar = request.form.get('guardar_direccion')
+
+    if guardar:
+
+        conexion, cursor = db_helper.get_db()
+        cursor = conexion.cursor()
+
+        cursor.execute("""
+            INSERT INTO direcciones (
+                id_usuario,
+                nombre_entrega,
+                calle_entrega,
+                portal_entrega,
+                piso_entrega,
+                puerta_entrega,
+                localidad_entrega,
+                provincia_entrega,
+                cp_entrega,
+                info_opcional_entrega
+            )
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (
+            session['id_usuario'],
+            nombre,
+            calle,
+            portal,
+            piso,
+            puerta,
+            localidad,
+            provincia,
+            cp,
+            info
+        ))
+
+        conexion.commit()
+
+        cursor.close()
+        conexion.close()
+
+    else:
+
+        session['direccion_temporal'] = {
+            'nombre': nombre,
+            'calle': calle,
+            'portal': portal,
+            'piso': piso,
+            'puerta': puerta,
+            'localidad': localidad,
+            'provincia': provincia,
+            'cp': cp,
+            'info': info
+        }
+
+    return redirect(url_for('carrito'))
+
+# Para editar una direccion
+@app.route('/direccion/editar', methods=['POST'])
+def editar_direccion():
+
+    if 'id_usuario' not in session:
+        return redirect(url_for('login'))
+
+    id_direccion = request.form['id_direccion_editar']
+
+    conexion, cursor = db_helper.get_db()
+
+    try:
+        cursor.execute("""
+            UPDATE direcciones
+            SET
+                nombre_entrega=%s,
+                calle_entrega=%s,
+                portal_entrega=%s,
+                piso_entrega=%s,
+                puerta_entrega=%s,
+                localidad_entrega=%s,
+                provincia_entrega=%s,
+                cp_entrega=%s,
+                info_opcional_entrega=%s
+            WHERE id_direccion=%s
+            AND id_usuario=%s
+        """, (
+            request.form['nombre_entrega'],
+            request.form['calle_entrega'],
+            request.form['portal_entrega'],
+            request.form['piso_entrega'],
+            request.form['puerta_entrega'],
+            request.form['localidad_entrega'],
+            request.form['provincia_entrega'],
+            request.form['cp_entrega'],
+            request.form.get('info_opcional_entrega'),
+            id_direccion,
+            session['id_usuario']
+        ))
+        conexion.commit()
+
+    except Exception as e:
+        print("ERROR AL EDITAR DIRECCIÓN:", e)
+        conexion.rollback()
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return redirect(url_for('carrito'))
 
 # ───────────────── PAGO ─────────────────
 
@@ -627,77 +796,13 @@ def pago():
         return redirect(url_for('login'))
     if not session.pop('pedido_completado', False):
         return redirect(url_for('productos'))
-        
+
     id_pedido = session.get('ultimo_pedido')
-    
+
     return render_template("pago.html", id_pedido=id_pedido)
 
 
 # ───────────────── DIRECCIONES ─────────────────
-
-@app.route("/direccion/editar/<int:id_direccion>", methods=['GET'])
-def editar_direccion_form(id_direccion):
-
-    if not session.get('id_usuario'):
-        return redirect(url_for('login'))
-
-    conexion, cursor = db_helper.get_db()
-
-    cursor.execute(
-        """
-        SELECT *
-        FROM direcciones
-        WHERE id_direccion=%s
-        AND id_usuario=%s
-        """,
-        (id_direccion, session['id_usuario'])
-    )
-
-    direccion = cursor.fetchone()
-
-    cursor.close()
-    conexion.close()
-
-    if not direccion:
-        return redirect(url_for('carrito'))
-
-    carrito = session.get('carrito', [])
-
-    subtotal = sum(
-        float(i['precio']) * int(i['cantidad'])
-        for i in carrito
-    )
-
-    envio = 0 if subtotal >= 30 else 3.99
-    total = subtotal + envio
-
-    conexion, cursor = db_helper.get_db()
-
-    cursor.execute(
-        """
-        SELECT *
-        FROM direcciones
-        WHERE id_usuario=%s
-        """,
-        (session['id_usuario'],)
-    )
-
-    direcciones = cursor.fetchall()
-
-    cursor.close()
-    conexion.close()
-
-    return render_template(
-        "checkout.html",
-        carrito=carrito,
-        subtotal=subtotal,
-        envio=envio,
-        total=total,
-        direcciones=direcciones,
-        editar_direccion=direccion
-    )
-
-
 @app.route("/direccion/eliminar/<int:id_direccion>")
 def eliminar_direccion(id_direccion):
 
@@ -707,7 +812,6 @@ def eliminar_direccion(id_direccion):
     conexion, cursor = db_helper.get_db()
 
     try:
-
         cursor.execute(
             """
             DELETE FROM direcciones
@@ -716,17 +820,13 @@ def eliminar_direccion(id_direccion):
             """,
             (id_direccion, session['id_usuario'])
         )
-
         conexion.commit()
 
     except Exception as e:
-
         print("ERROR AL ELIMINAR DIRECCIÓN:", e)
-
         conexion.rollback()
 
     finally:
-
         cursor.close()
         conexion.close()
 
@@ -734,18 +834,47 @@ def eliminar_direccion(id_direccion):
 
 
 # ───────────────── ADMIN ─────────────────
+
+@app.route("/admin/producto/eliminar/<int:id>", methods=['POST'])
+def eliminar_producto(id):
+
+    if not session.get('es_admin'):
+        return redirect(url_for('productos'))
+
+    conexion, cursor = db_helper.get_db()
+
+    try:
+        cursor.execute(
+            "DELETE FROM productos WHERE id_producto = %s",
+            (id,)
+        )
+        conexion.commit()
+
+    except Exception as e:
+        print("ERROR AL ELIMINAR:", e)
+        conexion.rollback()
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return redirect(url_for('productos'))
+
+
 @app.route("/admin/producto/anadir", methods=['POST'])
 def anadir_producto():
 
     if not session.get('es_admin'):
         return redirect(url_for('productos'))
 
-    nombre  = request.form.get('nombre', '').strip()
-    precio  = request.form.get('precio_unidad')
-    unidad  = request.form.get('unidad_medida', '').strip()
-    imagen  = request.form.get('url_imagen', '').strip()
-    id_cat  = request.form.get('id_categoria')
+    nombre    = request.form.get('nombre', '').strip()
+    precio    = request.form.get('precio_unidad')
+    unidad    = request.form.get('unidad_medida', '').strip()
+    imagen    = request.form.get('url_imagen', '').strip()
+    id_cat    = request.form.get('id_categoria')
     descuento = request.form.get('descuento') or None
+    fecha_fin = request.form.get('fecha_fin') or None
+    estado = request.form.get('estado')
 
     conexion, cursor = db_helper.get_db()
 
@@ -753,8 +882,8 @@ def anadir_producto():
         id_descuento = None
         if descuento:
             cursor.execute(
-                "INSERT INTO descuentos (descuento, tipo_descuento) VALUES (%s, 'porcentaje')",
-                (descuento,)
+                "INSERT INTO descuentos (descuento, tipo_descuento, fecha_fin) VALUES (%s, 'porcentaje', %s)",
+                (descuento, fecha_fin)
             )
             conexion.commit()
             id_descuento = cursor.lastrowid
@@ -778,39 +907,6 @@ def anadir_producto():
 
     return redirect(url_for('productos'))
 
-@app.route("/admin/producto/eliminar/<int:id>", methods=['POST'])
-def eliminar_producto(id):
-
-    if not session.get('es_admin'):
-        return redirect(url_for('productos'))
-
-    conexion, cursor = db_helper.get_db()
-
-    try:
-
-        cursor.execute(
-            """
-            DELETE FROM productos
-            WHERE id_producto = %s
-            """,
-            (id,)
-        )
-
-        conexion.commit()
-
-    except Exception as e:
-
-        print("ERROR AL ELIMINAR:", e)
-
-        conexion.rollback()
-
-    finally:
-
-        cursor.close()
-        conexion.close()
-
-    return redirect(url_for('productos'))
-
 
 @app.route("/admin/producto/editar/<int:id>", methods=['POST'])
 def editar_producto(id):
@@ -823,41 +919,49 @@ def editar_producto(id):
     unidad    = request.form.get('unidad_medida', '').strip()
     imagen    = request.form.get('url_imagen', '').strip()
     categoria = request.form.get('id_categoria')
+    descuento = request.form.get('descuento', '').strip()
+    fecha_fin = request.form.get('fecha_fin') or None
+    estado = request.form.get('estado')
 
     conexion, cursor = db_helper.get_db()
 
     try:
+        cursor.execute(
+            "SELECT id_descuento FROM productos WHERE id_producto = %s", (id,)
+        )
+        row = cursor.fetchone()
+        id_descuento_actual = row['id_descuento'] if row else None
+
+        if descuento and int(descuento) > 0:
+            if id_descuento_actual:
+                cursor.execute(
+                    "UPDATE descuentos SET descuento=%s, fecha_fin=%s, estado=%s WHERE id_descuento=%s",
+                    (descuento, fecha_fin, estado, id_descuento_actual)
+                )
+            else:
+                cursor.execute(
+                    "INSERT INTO descuentos (descuento, tipo_descuento, fecha_fin) VALUES (%s, 'porcentaje', %s)",
+                    (descuento, fecha_fin)
+                )
+                conexion.commit()
+                id_descuento_actual = cursor.lastrowid
 
         cursor.execute(
             """
             UPDATE productos
-            SET nombre=%s,
-                precio_unidad=%s,
-                unidad_medida=%s,
-                url_imagen=%s,
-                id_categoria=%s
+            SET nombre=%s, precio_unidad=%s, unidad_medida=%s,
+                url_imagen=%s, id_categoria=%s, id_descuento=%s
             WHERE id_producto=%s
             """,
-            (
-                nombre,
-                precio,
-                unidad,
-                imagen,
-                categoria,
-                id
-            )
+            (nombre, precio, unidad, imagen, categoria, id_descuento_actual, id)
         )
-
         conexion.commit()
 
     except Exception as e:
-
         print("ERROR AL EDITAR:", e)
-
         conexion.rollback()
 
     finally:
-
         cursor.close()
         conexion.close()
 

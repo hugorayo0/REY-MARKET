@@ -8,92 +8,100 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
 </head>
 <body>
- 
+
     <header>
         <a href="{{ url_for('inicio') }}" class="logo">
             <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
         </a>
-
         <nav>
             <ul>
                 <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
                 <li><a href="{{ url_for('productos') }}">Productos</a></li>
                 <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
                 <li style="position:relative;">
-                    <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.4rem;position:relative;display:inline-block;color:white;text-decoration:none;padding:7px;">🛒
+                    <a href="{{ url_for('carrito') }}" id="carrito-icon" style="font-size:1.4rem;position:relative;display:inline-block;color:white;text-decoration:none;padding:7px;">
+                        <span style="font-size:1.4rem;">🛒</span>
                         <span id="carrito-badge" class="carrito-badge {{ 'badge-visible' if total_items_carrito > 0 else 'badge-oculto' }}">{{ total_items_carrito }}</span>
                     </a>
                 </li>
             </ul>
         </nav>
-
         <div class="perfil-wrapper">
             <button class="perfil-btn" onclick="togglePerfil()" title="Mi cuenta">👤</button>
             <div class="perfil-menu" id="perfilMenu">
                 {% if session.get('nombre') %}
                     <div class="perfil-saludo">Hola, {{ session['nombre'] }} 👋</div>
-                     <a href="{{ url_for('historial') }}"> Historial de pedidos</a>
-                    <a href="{{ url_for('logout') }}"> Cerrar sesión</a>
-                    
+                    <a href="{{ url_for('historial') }}">Historial de pedidos</a>
+                    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
                 {% else %}
-                    <a href="{{ url_for('login') }}"> Iniciar sesión</a>
-                    <a href="{{ url_for('registro') }}"> Registrarse</a>
+                    <a href="{{ url_for('login') }}">Iniciar sesión</a>
+                    <a href="{{ url_for('registro') }}">Registrarse</a>
                 {% endif %}
             </div>
         </div>
     </header>
-    
-    <main>
 
+    <main>
         <center><h1 style="margin-top: 30px; color: #2e7d32;">Contacto</h1></center>
         <center><p style="color: #555; margin-bottom: 30px;">Estamos aquí para ayudarte</p></center>
-        
+
         <div style="display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; padding: 0 5% 60px;">
-            
+
             <!-- Info -->
             <div style="background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); padding: 30px; width: 300px;">
                 <h2 style="color: #2e7d32; margin-bottom: 20px;">Información</h2>
-                
+
                 <p style="font-weight: bold; margin-bottom: 5px;">Dirección</p>
                 <p style="color: #555; margin-bottom: 20px;">Rúa Edelmiro Trillo, 16, 36600 Vilagarcía de Arousa, Pontevedra</p>
-                
+
                 <p style="font-weight: bold; margin-bottom: 5px;">Teléfono</p>
                 <p style="color: #555; margin-bottom: 20px;">+34 910 123 456</p>
-                
+
                 <p style="font-weight: bold; margin-bottom: 5px;">Email</p>
                 <p style="color: #555; margin-bottom: 20px;">info@reymarket.es</p>
-                
+
                 <p style="font-weight: bold; margin-bottom: 5px;">Horario</p>
                 <p style="color: #555;">Lunes a Sábado: 9:00 — 22:00</p>
                 <p style="color: #555;">Domingo: Cerrado</p>
             </div>
-            
+
             <!-- Formulario -->
             <div style="background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); padding: 30px; width: 400px;">
                 <h2 style="color: #2e7d32; margin-bottom: 20px;">Escríbenos</h2>
+
+                {% if mensaje_ok %}
+                <p style="color:green; font-weight:bold; margin-bottom:15px;">
+                    ✅ Mensaje enviado correctamente. ¡Gracias!
+                </p>
+                {% endif %}
+                {% if error %}
+                <p style="color:red; font-weight:bold; margin-bottom:15px;">
+                    ❌ {{ error }}
+                </p>
+                {% endif %}
 
                 <form method="POST" action="{{ url_for('contacto') }}">
                     <p style="font-weight: bold; margin-bottom: 5px;">Nombre</p>
                     <input type="text" name="nombre" placeholder="Tu nombre" required
                     style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin-bottom:15px; font-size:14px;">
-                    
+
                     <p style="font-weight: bold; margin-bottom: 5px;">Email</p>
                     <input type="email" name="email" placeholder="Tu email" required
                     style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin-bottom:15px; font-size:14px;">
-                    
+
                     <p style="font-weight: bold; margin-bottom: 5px;">Mensaje</p>
                     <textarea name="mensaje" placeholder="Tu mensaje" required rows="5"
                     style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin-bottom:20px; font-size:14px; resize:vertical;"></textarea>
-                    
+
                     <button type="submit" style="width:100%;">Enviar mensaje</button>
                 </form>
             </div>
-        
+
         </div>
-        
+
         <div style="display: flex; justify-content: center; margin: 30px 0;">
             <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12129.854751615536!2d-8.772078433384932!3d42.596543946337576!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd2f14173b2a1475%3A0x8641dba7310fcaf9!2sR%C3%BAa%20Edelmiro%20Trillo%2C%2016%2C%2036600%20Vilagarc%C3%ADa%20de%20Arousa%2C%20Pontevedra!5e0!3m2!1ses!2ses!4v1778670897769!5m2!1ses!2ses" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12129.854751615536!2d-8.772078433384932!3d42.596543946337576!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd2f14173b2a1475%3A0x8641dba7310fcaf9!2sR%C3%BAa%20Edelmiro%20Trillo%2C%2016%2C%2036600%20Vilagarc%C3%ADa%20de%20Arousa%2C%20Pontevedra!5e0!3m2!1ses!2ses!4v1778670897769!5m2!1ses!2ses"
             width="600"
             height="350"
             style="border: 0; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"
@@ -101,14 +109,18 @@
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
-        
-        <div id="recuadro-cookies" class="recuadro-cookies">
-            <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
-            <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
-            <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
-        </div>
-    </main>
 
+        <div id="recuadro-cookies" class="recuadro-cookies">
+            <div class="texto-cookies">
+                <p>En REY MARKET utilizamos cookies propias y de terceros para asegurarnos de que todo funcione correctamente y ofrecerte el mejor servicio.</p>
+            </div>
+            <div class="contenedor-botones-cookies">
+                <button id="boton-rechazar" class="boton-cookies">RECHAZAR COOKIES</button>
+                <button id="boton-aceptar" class="boton-cookies">ACEPTAR COOKIES</button>
+            </div>
+        </div>
+
+    </main>
     <script src="{{ url_for('static', filename='js/cookies.js') }}"></script>
     <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 </body>
