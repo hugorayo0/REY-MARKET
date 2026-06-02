@@ -6,9 +6,12 @@ import mysql.connector
 import db_helper
 import hashlib
 import os
+import locale
 
 app = Flask(__name__)
 application = app
+
+locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 
 app.secret_key = os.environ.get("SECRET_KEY")
 
